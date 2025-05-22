@@ -7451,17 +7451,17 @@ IF (FOUND) THEN
       END IF
       
       
-      jz = 1
-      DO jy = 1,ny
-        DO jx = 0,nx
-          GasFlowFactorX(jx,jy,jz) = permx(jx,jy,jz)/permmaxX
-        END DO
-      END DO
-      DO jy = 0,ny
-        DO jx = 1,nx
-          GasFlowFactorY(jx,jy,jz) = permy(jx,jy,jz)/permmaxY
-        END DO
-      END DO
+!!!      jz = 1
+!!!      DO jy = 1,ny
+!!!        DO jx = 0,nx
+!!!          GasFlowFactorX(jx,jy,jz) = permx(jx,jy,jz)/permmaxX
+!!!        END DO
+!!!      END DO
+!!!      DO jy = 0,ny
+!!!        DO jx = 1,nx
+!!!          GasFlowFactorY(jx,jy,jz) = permy(jx,jy,jz)/permmaxY
+!!!        END DO
+!!!      END DO
 
       IF (nz == 1) THEN
 
