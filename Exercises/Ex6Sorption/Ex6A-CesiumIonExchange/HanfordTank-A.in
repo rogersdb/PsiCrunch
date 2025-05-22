@@ -7,7 +7,7 @@ END
 RUNTIME
 time_units          hours
 timestep_max        0.1
-timestep_init       0.00001
+timestep_init       1.0E-12
 time_tolerance      0.01
 solver              gmres
 preconditioner      ilu

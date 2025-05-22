@@ -94,8 +94,7 @@
 			<File RelativePath="..\Source\CrunchPETScInitializeDiffusion.F90"/>
 			<File RelativePath="..\Source\CrunchPETScInitializePressure.F90"/>
 			<File RelativePath="..\Source\CrunchPETScTolerances.F90"/>
-			<File RelativePath="..\Source\CrunchTope.F90">
-			</File>
+			<File RelativePath="..\Source\CrunchTope.F90"/>
 			<File RelativePath="..\Source\CrunchTopeDriver.F90"/>
 			<File RelativePath="..\Source\crunchtype.F90"/>
 			<File RelativePath="..\Source\database.F90"/>
@@ -146,8 +145,7 @@
 			<File RelativePath="..\Source\GlobalArrayAllocation.F90"/>
 			<File RelativePath="..\Source\GlobalDensity.F90"/>
 			<File RelativePath="..\Source\graphics3d.F90"/>
-			<File RelativePath="..\Source\GraphicsKaleidagraph.F90">
-			</File>
+			<File RelativePath="..\Source\GraphicsKaleidagraph.F90"/>
 			<File RelativePath="..\Source\GraphicsTecplot.F90"/>
 			<File RelativePath="..\Source\GraphicsVisit.F90"/>
 			<File RelativePath="..\Source\harmonic.F90"/>

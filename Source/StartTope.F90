@@ -3324,8 +3324,6 @@ DO nco = 1,nchem
   portemp = porcond(nco)
   PressureTemp = PressureCond(nco)
 
-  CALL keqcalc2_init(ncomp,nrct,nspec,ngas,nsurf_sec,tempc,PressureTemp)
-
   DO i = 1,ncomp
     namtemp = ulab(i)
     sptmp10(i) = guess(i,nco)
@@ -3339,6 +3337,8 @@ DO nco = 1,nchem
     spsurftmp10(is) = guess_surf(is,nco)
     spsurftmp(is) = DLOG(spsurftmp10(is))
   END DO
+  
+  CALL keqcalc2_init(ncomp,nrct,nspec,ngas,nsurf_sec,tempc,PressureTemp)
 
   gamtmp = 0.0
 
@@ -8499,16 +8499,16 @@ IF (constant_gasflow) THEN
   qygas = qygasinit
   qzgas = qzgasinit
   
-  DO jy = 1,ny
-    DO jx = 0,nx
-      qxgas(jx,jy,1) = GasFlowFactorX(jx,jy,1)*qxgas(jx,jy,1)
-    END DO
-  END DO
-  DO jy = 0,ny
-    DO jx = 1,nx
-      qygas(jx,jy,1) = GasFlowFactorY(jx,jy,1)*qygas(jx,jy,1)
-    END DO
-  END DO
+!!!  DO jy = 1,ny
+!!!    DO jx = 0,nx
+!!!      qxgas(jx,jy,1) = GasFlowFactorX(jx,jy,1)*qxgas(jx,jy,1)
+!!!    END DO
+!!!  END DO
+!!!  DO jy = 0,ny
+!!!    DO jx = 1,nx
+!!!      qygas(jx,jy,1) = GasFlowFactorY(jx,jy,1)*qygas(jx,jy,1)
+!!!    END DO
+!!!  END DO
       
 
 END IF
