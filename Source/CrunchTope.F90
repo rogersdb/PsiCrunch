@@ -2840,133 +2840,117 @@ END IF
   177 format(1x,1PE12.4,1x, 1PE12.4,1x,1PE12.4,1x,1PE12.4)
               
       IF (MOD(nn,ScreenInterval) == 0) THEN
-
-        if (SaltCreep) THEN
-
-          totPor = 0.0
-          totVol = 0.0
-          totChange = 0.0
-
-          do jy = 1,ny
-            do jx = 1,nx
-              IF (jinit(jx,jy,1) /= 3) THEN
-                totVol = totVol + dxx(jx)*dyy(jy)
-                totPor = totPor + por(jx,jy,1)*dxx(jx)*dyy(jy)
-                totChange = totChange + ( porin(jx,jy,1) - por(jx,jy,1) ) * dxx(jx)*dyy(jy)
-              END IF
-           end do
-          end do
-
-          totCheck = totPor/totVol
-          totCheckInitial = totChange/totVol
-!!!          write(128,*) time,totCheck
-!!!          write(129,*) time,totCheckInitial
-
-        END IF
-
-        WRITE(*,*) 'Time step # ',nn
         
-      GasFlux_FaceWest = 0.0
-      GasFlux_FaceEast = 0.0
-      GasFlux_FaceSouth = 0.0
-      GasFlux_FaceNorth = 0.0
+        WRITE(*,*) 'Time step # ',nn
 
-      jz = 1
-      jx = 1
-      DO jy = 1,ny
-        DO kk = 1,ngas
-          GasFlux_FaceWest(kk) = GasFlux_FaceWest(kk) + ag(jx,jy,1) * (spgas10(kk,jx-1,jy,1)-spgas10(kk,jx,jy,jz)) * delt
-        END DO
-      END DO    
+        IF (SerpentineFracture) THEN
+
+          GasFlux_FaceWest = 0.0
+          GasFlux_FaceEast = 0.0
+          GasFlux_FaceSouth = 0.0
+          GasFlux_FaceNorth = 0.0
+
+          jz = 1
+          jx = 1
+          DO jy = 1,ny
+            DO kk = 1,ngas
+              GasFlux_FaceWest(kk) = GasFlux_FaceWest(kk) + ag(jx,jy,1) * (spgas10(kk,jx-1,jy,1)-spgas10(kk,jx,jy,jz)) * delt
+            END DO
+          END DO    
       
-      jz = 1
-      jx = nx
-      DO jy = 1,ny
-        DO kk = 1,ngas
-          GasFlux_FaceEast(kk) = GasFlux_FaceEast(kk) +  cg(jx,jy,1) * (spgas10(kk,jx+1,jy,1)-spgas10(kk,jx,jy,jz)) * delt
-        END DO
-      END DO
+          jz = 1
+          jx = nx
+          DO jy = 1,ny
+            DO kk = 1,ngas
+              GasFlux_FaceEast(kk) = GasFlux_FaceEast(kk) +  cg(jx,jy,1) * (spgas10(kk,jx+1,jy,1)-spgas10(kk,jx,jy,jz)) * delt
+            END DO
+          END DO
       
-      jz = 1
-      jy = 1
-      DO jx = 1,nx
-        DO kk = 1,ngas
-          GasFlux_FaceSouth(kk) = GasFlux_FaceSouth(kk) + fg(jx,jy,1) * (spgas10(kk,jx,jy-1,1)-spgas10(kk,jx,jy,jz)) * delt
-        END DO
-      END DO 
+          jz = 1
+          jy = 1
+          DO jx = 1,nx
+            DO kk = 1,ngas
+              GasFlux_FaceSouth(kk) = GasFlux_FaceSouth(kk) + fg(jx,jy,1) * (spgas10(kk,jx,jy-1,1)-spgas10(kk,jx,jy,jz)) * delt
+            END DO
+          END DO 
       
-      jz = 1
-      jy = ny
-      DO jx = 1,nx
-        DO kk = 1,ngas
-          GasFlux_FaceNorth(kk) = GasFlux_FaceNorth(kk) + dg(jx,jy,1) * (spgas10(kk,jx,jy+1,1)-spgas10(kk,jx,jy,jz)) * delt
-        END DO
-      END DO
+          jz = 1
+          jy = ny
+          DO jx = 1,nx
+            DO kk = 1,ngas
+              GasFlux_FaceNorth(kk) = GasFlux_FaceNorth(kk) + dg(jx,jy,1) * (spgas10(kk,jx,jy+1,1)-spgas10(kk,jx,jy,jz)) * delt
+            END DO
+          END DO
       
-      !!! Transport coefficient "dg" = m^3/yr so multiplying by mol/m^3 gives mol/yr. Multiplying by Delta t gives moles
+        !!! Transport coefficient "dg" = m^3/yr so multiplying by mol/m^3 gives mol/yr. Multiplying by Delta t gives moles
       
           write(202,2255) time, GasFlux_FaceWest(1)
           write(203,2255) time, GasFlux_FaceEast(1)
           write(204,2255) time, GasFlux_FaceSouth(1)
           write(205,2255) time, GasFlux_FaceNorth(1)
           
-      AqueousFlux_FaceWest = 0.0
-      AqueousFlux_FaceEast = 0.0
-      AqueousFlux_FaceSouth = 0.0
-      AqueousFlux_FaceNorth = 0.0
+          AqueousFlux_FaceWest = 0.0
+          AqueousFlux_FaceEast = 0.0
+          AqueousFlux_FaceSouth = 0.0
+          AqueousFlux_FaceNorth = 0.0
       
-      kk = 21
+          kk = 21
       
-      jz = 1
-      jx = 1
-      DO jy = 1,ny
-        AqueousFlux_FaceWest(kk) = AqueousFlux_FaceWest(kk) + a(jx,jy,1) * (sp10(kk,jx-1,jy,1)-sp10(kk,jx,jy,jz)) * delt
-      END DO  
+          jz = 1
+          jx = 1
+          DO jy = 1,ny
+            AqueousFlux_FaceWest(kk) = AqueousFlux_FaceWest(kk) + a(jx,jy,1) * (sp10(kk,jx-1,jy,1)-sp10(kk,jx,jy,jz)) * delt
+          END DO  
       
-      jz = 1
-      jx = nx
-      DO jy = 1,ny
-        AqueousFlux_FaceEast(kk) = AqueousFlux_FaceEast(kk) + c(jx,jy,1) * (sp10(kk,jx+1,jy,1)-sp10(kk,jx,jy,jz)) * delt
-      END DO 
+          jz = 1
+          jx = nx
+          DO jy = 1,ny
+            AqueousFlux_FaceEast(kk) = AqueousFlux_FaceEast(kk) + c(jx,jy,1) * (sp10(kk,jx+1,jy,1)-sp10(kk,jx,jy,jz)) * delt
+          END DO 
       
-      jz = 1
-      jy = 1
-      DO jx = 1,nx
-        AqueousFlux_FaceSouth(kk) = AqueousFlux_FaceSouth(kk) + f(jx,jy,1) * (sp10(kk,jx,jy-1,1)-sp10(kk,jx,jy,jz)) * delt
-      END DO 
+          jz = 1
+          jy = 1
+          DO jx = 1,nx
+            AqueousFlux_FaceSouth(kk) = AqueousFlux_FaceSouth(kk) + f(jx,jy,1) * (sp10(kk,jx,jy-1,1)-sp10(kk,jx,jy,jz)) * delt
+          END DO 
       
-      jz = 1
-      jy = ny
-      DO jx = 1,nx
-        AqueousFlux_FaceNorth(kk) = AqueousFlux_FaceNorth(kk) + d(jx,jy,1) * (sp10(kk,jx,jy+1,1)-sp10(kk,jx,jy,jz)) * delt
-      END DO
+          jz = 1
+          jy = ny
+          DO jx = 1,nx
+            AqueousFlux_FaceNorth(kk) = AqueousFlux_FaceNorth(kk) + d(jx,jy,1) * (sp10(kk,jx,jy+1,1)-sp10(kk,jx,jy,jz)) * delt
+          END DO
       
           write(212,2255) time, AqueousFlux_FaceWest(1)
           write(213,2255) time, AqueousFlux_FaceEast(1)
           write(214,2255) time, AqueousFlux_FaceSouth(1)
           write(215,2255) time, AqueousFlux_FaceNorth(1)
-
-          IF (OutputTimeUnits == 'years') THEN
-            WRITE(*,225) time,delt
-          ELSE IF (OutputTimeUnits == 'days') THEN
-            WRITE(*,2251) time*OutputTimeScale,delt*OutputTimeScale
-          ELSE IF (OutputTimeUnits == 'hours') THEN
-            WRITE(*,2252) time*OutputTimeScale,delt*OutputTimeScale
-          ELSE IF (OutputTimeUnits == 'minutes') THEN
-            WRITE(*,2253) time*OutputTimeScale,delt*OutputTimeScale
-          ELSE IF (OutputTimeUnits == 'seconds') THEN
-            WRITE(*,2254) time*OutputTimeScale,delt*OutputTimeScale
-          ELSE
-            WRITE(*,*)
-            WRITE(*,*) ' Time units not recognized'
-            WRITE(*,*)
-            READ(*,*)
-            STOP
-          END IF
+          
+        END IF
+          
+        IF (OutputTimeUnits == 'years') THEN
+          WRITE(*,225) time,delt
+        ELSE IF (OutputTimeUnits == 'days') THEN
+          WRITE(*,2251) time*OutputTimeScale,delt*OutputTimeScale
+        ELSE IF (OutputTimeUnits == 'hours') THEN
+          WRITE(*,2252) time*OutputTimeScale,delt*OutputTimeScale
+        ELSE IF (OutputTimeUnits == 'minutes') THEN
+          WRITE(*,2253) time*OutputTimeScale,delt*OutputTimeScale
+        ELSE IF (OutputTimeUnits == 'seconds') THEN
+          WRITE(*,2254) time*OutputTimeScale,delt*OutputTimeScale
+        ELSE
+          WRITE(*,*)
+          WRITE(*,*) ' Time units not recognized'
+          WRITE(*,*)
+          READ(*,*)
+          STOP
+        END IF
+          
         WRITE(*,217) iterat
         WRITE(*,227) phchg,phloc(1),phloc(2),phloc(3)
         WRITE(*,*)
+        
       END IF
+        
     ENDIF
     iteration_tot = iterat + iteration_tot
 

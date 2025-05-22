@@ -264,6 +264,7 @@ MODULE mineral
   LOGICAL(LGT)                              :: SaltCreep
   LOGICAL(LGT)                              :: CalciteCreep
   LOGICAL(LGT)                              :: SerpentineFracture
+  LOGICAL(LGT)                              :: BatchReactor
   LOGICAL(LGT)                              :: CriticalZone
   
   CHARACTER (LEN=mlen)                      :: AqueousKineticFile

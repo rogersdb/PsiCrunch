@@ -917,6 +917,11 @@ IF (found) THEN
   parfind = ' '
   SerpentineFracture = .FALSE.
   CALL read_logical(nout,lchar,parchar,parfind,SerpentineFracture)
+  
+  parchar = 'BatchReactor'
+  parfind = ' '
+  BatchReactor = .FALSE.
+  CALL read_logical(nout,lchar,parchar,parfind,BatchReactor)
 
   parchar = 'montterri'
   parfind = ' '
