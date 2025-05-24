@@ -92,6 +92,106 @@ For fully optimized production code, be sure to configure PETSc with "--with-deb
 ---> Add "H2O" to the end of the list of PRIMARY SPECIES.  
 ---> Add also to each of the CONDITION blocks  "H2O  55.50843506"
 
+### Thermodynamic Database
+
+It turns out that the "Pflotran" thermodynamic database is almost identical to that used by CrunchFlow.  This is because lead Crunch developer Carl Steefel "borrowed" this format from Peter Lichtner way back in 1991 or 1992 when they were both at Universitat Bern in Switzerland.
+
+Now it is possible to easily generate a thermodynamic database for a temperature array and at various pressures using pyGCC (Awolayo and Tutolo, 2022). See the pyGCC website for more details
+
+    https://pygcc.readthedocs.io/en/latest/
+
+Using any Python driver routine like Spyder or Colab, you can run the Python scripts for pyGCC. The following would import pyGCC and indicate to use the thermo.2021 database (that apparently goes with Geochemists Workbench, or GWB). This should successfully create the database with 7 temperature points at a pressure of 230 bars (23 MPa).  This produces a nice and readable thermodynamic database in the GWB format.
+
+    import pygcc
+    from pygcc.pygcc_utils import *
+    ps = db_reader(sourcedb = 'thermo.2021', sourceformat = 'gwb')
+
+    write_database(T = np.array([0.010, 25, 50, 100, 150, 200, 250]), P = 230, solid_solution = 'Yes', clay_thermo = 'Yes', 
+    sourcedb = 'thermo.2021', dataset = 'GWB',print_msg = True)
+
+Then to create the Pflotran-formatted or Crunch-formatted database, you can follow the above (still inside your Python driver) with:
+
+    write_database(T = np.array([0.010, 25, 50, 100, 150, 200, 250]), P = 230, solid_solution = 'Yes', clay_thermo = 'Yes', 
+    sourcedb = 'thermo.2021', dataset = 'Pflotran', sourceformat = 'GWB', print_msg = True)
+
+This will create a Pflotran-formatted thermodyanmic database for the same temperature range and pressure as the more nicely formatted GWB database.  
+
+Now you just need to add in the Debye-Huckel parameters for these temperature and pressures (missing for some reason in Pflotran) by copying and pasting from the GWB-formatted database
+
+    * temperatures (degC)
+          0.0100     25.0000     50.0000    100.0000
+        150.0000    200.0000    250.0000
+    * pressures (bar)
+        230.0000    230.0000    230.0000    230.0000
+        230.0000    230.0000    230.0000
+    * debye huckel a (adh)
+          0.4877      0.5052      0.5286      0.5904
+          0.6718      0.7772      0.9205
+    * debye huckel b (bdh)
+          0.3251      0.3285      0.3325      0.3416
+          0.3517      0.3626      0.3746
+    * bdot
+          0.0342      0.0374      0.0409      0.0471
+          0.0495      0.0445      0.0288
+
+to the Crunch format:
+
+    'temperature points' 7   0.01  25.  50.  100. 150. 200. 250.
+    'Debye-Huckel adh'  0.4877   0.5052  0.5286  0.5904  0.6718  0.7772  0.9205
+    'Debye-Huckel bdh'  0.3251   0.3285  0.3325  0.3416  0.3517  0.3626  0.3746
+    'Debye-Huckel bdt'  0.0342   0.0374  0.0409  0.0471  0.0495  0.0445  0.0288	 
+
+And then change the end of section reads from 
+
+    'null' 0 0 0
+    !:species_name  num (n_i A_i, i=1,num)  log K (1:8)  a0  valence  formula weight [g]
+
+and
+
+    'null' 1 0. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.
+    !:gas_name molar_vol  num (n_i A_i, i=1,num) log K (1:8)  formula weight [g]
+
+and so on to:
+
+    'End of primary'   0.0  0.0  0.0
+    'End of secondary' 1  0. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.
+    'End of gases'     0.  1  1. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0. 
+    'End of minerals'  0.  1  0. '0' 0. 0. 0. 0. 0. 0. 0. 0.
+
+Then append a mineral kinetics section (see Crunch Manual and Shortcourse Exercises for more kinetic options)
+
+    Begin mineral kinetics
+    +----------------------------------------------------
+    Fo90
+      label = default
+      type  = tst
+      rate(25C) = -6.00
+      activation = 15.0  (kcal/mole)
+      dependence :
+    +----------------------------------------------------
+    Lizardite
+      label = default
+      type  = tst
+      rate(25C) = -6.00
+      activation = 15.0  (kcal/mole)
+      dependence :
+    +----------------------------------------------------
+    Magnetite
+      label = default
+      type  = tst
+      rate(25C) = -6.00
+      activation = 15.0  (kcal/mole)
+      dependence :
+    +----------------------------------------------------
+    Brucite
+      label = default
+      type  = tst
+      rate(25C) = -6.00
+      activation = 15.0  (kcal/mole)
+      dependence :
+    +----------------------------------------------------
+
+
 ### Pumping Wells
  
 ---> If there are pumping wells, them "pumpunits" must be set /= 0.0
