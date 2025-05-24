@@ -114,7 +114,7 @@ Then to create the Pflotran-formatted or Crunch-formatted database, you can foll
     write_database(T = np.array([0.010, 25, 50, 100, 150, 200, 250]), P = 230, solid_solution = 'Yes', clay_thermo = 'Yes', 
     sourcedb = 'thermo.2021', dataset = 'Pflotran', sourceformat = 'GWB', print_msg = True)
 
-This will create a Pflotran-formatted thermodyanmic database for the same temperature range and pressure as the more nicely formatted GWB database.  
+This will create a Pflotran-formatted thermodynamic database for the same temperature range and pressure as the more nicely formatted GWB database.  
 
 Now you just need to add in the Debye-Huckel parameters for these temperature and pressures (missing for some reason in Pflotran) by copying and pasting from the GWB-formatted database
 
