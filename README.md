@@ -100,7 +100,7 @@ Now it is possible to easily generate a thermodynamic database for a temperature
 
     https://pygcc.readthedocs.io/en/latest/
 
-Using any Python driver routine like Spyder or Colab, you can run the Python scripts for pyGCC. The following would import pyGCC and indicate to use the thermo.2021 database (that apparently goes with Geochemists Workbench, or GWB). This should successfully create the database with 7 temperature points at a pressure of 230 bars (23 MPa).  This produces a nice and readable thermodynamic database in the GWB format.
+Using any Python driver routine like Spyder or Colab, you can run the Python scripts for pyGCC. The following would import pyGCC and indicate to use the thermo.2021 database (that apparently goes with Geochemists Workbench, or GWB). This should successfully create the database with 7 temperature points at a pressure of 230 bars (23 MPa).  This produces a nicely readable thermodynamic database in the GWB format.
 
     import pygcc
     from pygcc.pygcc_utils import *
@@ -114,9 +114,9 @@ Then to create the Pflotran-formatted or Crunch-formatted database, you can foll
     write_database(T = np.array([0.010, 25, 50, 100, 150, 200, 250]), P = 230, solid_solution = 'Yes', clay_thermo = 'Yes', 
     sourcedb = 'thermo.2021', dataset = 'Pflotran', sourceformat = 'GWB', print_msg = True)
 
-This will create a Pflotran-formatted thermodynamic database for the same temperature range and pressure as the more nicely formatted GWB database.  
+This will create a Pflotran-formatted thermodynamic database for the same temperature range and pressure as the more nicely formatted GWB database. Using Spyder, I find this under my name on Windows and "output/Pflotran". 
 
-Now you just need to add in the Debye-Huckel parameters for these temperature and pressures (missing for some reason in Pflotran) by copying and pasting from the GWB-formatted database
+Now you just need to add in the Debye-Huckel parameters to the new Crunch database for these temperature and pressures (missing for some reason in Pflotran) by copying and pasting from the GWB-formatted database
 
     * temperatures (degC)
           0.0100     25.0000     50.0000    100.0000
@@ -134,7 +134,7 @@ Now you just need to add in the Debye-Huckel parameters for these temperature an
           0.0342      0.0374      0.0409      0.0471
           0.0495      0.0445      0.0288
 
-to the Crunch format:
+into the Crunch format:
 
     'temperature points' 7   0.01  25.  50.  100. 150. 200. 250.
     'Debye-Huckel adh'  0.4877   0.5052  0.5286  0.5904  0.6718  0.7772  0.9205
@@ -151,12 +151,26 @@ and
     'null' 1 0. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.
     !:gas_name molar_vol  num (n_i A_i, i=1,num) log K (1:8)  formula weight [g]
 
+and
+
+    'null' 0. 1 1. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0.
+    !:mineral_name molar_vol  num (n_i A_i, i=1,num) log K (1:8)  formula weight [g]
+
+and
+
+    'null' 0. 1 1. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0.
+
 and so on to:
 
     'End of primary'   0.0  0.0  0.0
     'End of secondary' 1  0. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.
     'End of gases'     0.  1  1. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0. 
     'End of minerals'  0.  1  0. '0' 0. 0. 0. 0. 0. 0. 0. 0.
+
+I deleted the "null" comment at the end of minerals and before oxides altogether (Crunch would consider the oxides as just additional minerals).  So delete this line in the Pflotran-->Crunch database altogether:
+
+    'null' 1 0. '0' 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.
+    !:oxide_name molar_vol  num (n_i A_i, i=1,num) log K (1:8)  formula weight [g]
 
 Then append a mineral kinetics section (see Crunch Manual and Shortcourse Exercises for more kinetic options)
 
@@ -174,7 +188,7 @@ Then append a mineral kinetics section (see Crunch Manual and Shortcourse Exerci
       type  = tst
       rate(25C) = -6.00
       activation = 15.0  (kcal/mole)
-      dependence :
+      dependence :  H+  -0.13
     +----------------------------------------------------
     Magnetite
       label = default
@@ -190,7 +204,6 @@ Then append a mineral kinetics section (see Crunch Manual and Shortcourse Exerci
       activation = 15.0  (kcal/mole)
       dependence :
     +----------------------------------------------------
-
 
 ### Pumping Wells
  
