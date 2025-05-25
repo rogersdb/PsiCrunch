@@ -893,6 +893,11 @@ IF (found) THEN
   parfind = ' '
   CALL read_logical(nout,lchar,parchar,parfind,ContactPressureLogical)
   
+  UtahForgeLogical = .FALSE.
+  parchar = 'utahforge'
+  parfind = ' '
+  CALL read_logical(nout,lchar,parchar,parfind,UtahForgeLogical)
+  
   nmmLogical = .FALSE.
   parchar = 'nmm'
   parfind = ' '
@@ -4495,6 +4500,74 @@ IF (found) THEN
   END IF
   
   CALL read_het(nout,nchem,nhet,nx,ny,nz)
+  
+  IF (ContactPressureLogical .and. UtahForgeLogical) THEN
+    
+    IF (ALLOCATED(stress)) THEN
+      DEALLOCATE(stress)
+    END IF
+    ALLOCATE(stress(nx,ny,nz))
+
+    stress = 0.00
+      
+!!! porespace             1-220    1-150    1-1
+!!! proppant              11-210   26-125   1-1
+!!! granitoid             1-10     26-125   1-1
+!!! granitoid             141-150  26-125   1-1
+      
+    jy = 22
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/4.0    !!! Granitoid
+    end do
+    jy = 23
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/2.0    !!! Granitoid
+    end do
+    jy = 24
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000    !!! Granitoid
+    end do
+    
+    jy = 27
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000    !!! Quartz
+    end do
+    jy = 28
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/2.0    !!! Quartz
+    end do
+    jy = 29
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/4.0    !!! Quartz
+    end do
+      
+    jy = 122
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/4.0     !!! Quartz
+    end do    
+    jy = 123
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/2.0     !!! Quartz
+    end do    
+    jy = 124
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000    !!! Quartz
+    end do
+    
+    jy = 127
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000    !!! Granitoid
+    end do
+    jy = 128
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/2.0     !!! Granitoid
+    end do
+    jy = 129
+    do jx = 21,200
+      stress(jx,jy,1) = 190*1000000/4.0     !!! Granitoid
+    end do
+      
+  END IF
 
   IF (ReadInitialConditions .and. InitialConditionsFile /= ' ') THEN
     
@@ -4513,13 +4586,6 @@ IF (found) THEN
     FileTemp = InitialConditionsFile
     CALL stringlen(FileTemp,FileNameLength)
   
-    IF (ContactPressureLogical) THEN
-      IF (ALLOCATED(stress)) THEN
-        DEALLOCATE(stress)
-      END IF
-      ALLOCATE(stress(nx,ny,nz))
-      stress = 0.00
-    END IF
   
     IF (nmmLogical .AND. ContactPressureLogical) THEN
      

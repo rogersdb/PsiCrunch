@@ -87,6 +87,10 @@ For fully optimized production code, be sure to configure PETSc with "--with-deb
 
     FFLAGS  = -w -O3 -ffpe-trap=invalid,overflow,zero 
 
+### Tip of the Day
+
+For those wanting to run CrunchFlow directly from Visual Studio, the easiest way to change from one input directory to another is by going to Configuration Properties/Debugging/Working Directory and copying and pasting the directory (AKA folder) from Windows.  This way, Visual Studio will look for your input files there and also write the output files to the same directory.
+
 ### RunTime
 
 ---> Add "H2O" to the end of the list of PRIMARY SPECIES.  
