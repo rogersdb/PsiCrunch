@@ -29,6 +29,12 @@ def test_parse_planes_line_default_planes():
     assert result["planes"] is None
 
 
+def test_parse_planes_line_with_comment():
+    line = ">FeOH 5.0 planes= 0.5 0.3 0.2  # comment"
+    result = parse_planes_line(line)
+    assert result["planes"] == (0.5, 0.3, 0.2)
+
+
 def test_parse_edl_block():
     lines = [
         "irrelevant line",
@@ -36,6 +42,20 @@ def test_parse_edl_block():
         "  >FeOH   1.0  0.2  78.5",
         "  >FeOH2  1.5  0.3  80.0",
         "End edl parameters",
+    ]
+    params = parse_edl_block(lines)
+    assert params[">FeOH"] == (1.0, 0.2, 78.5)
+    assert params[">FeOH2"] == (1.5, 0.3, 80.0)
+    assert len(params) == 2
+
+
+def test_parse_edl_block_with_comments():
+    lines = [
+        "Begin edl parameters",
+        "  # comment line",
+        "  >FeOH   1.0  0.2  78.5  # trailing comment",
+        "  >FeOH2  1.5  0.3  80.0  ! another",
+        "End edl parameters  # end comment",
     ]
     params = parse_edl_block(lines)
     assert params[">FeOH"] == (1.0, 0.2, 78.5)

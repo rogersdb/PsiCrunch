@@ -5,15 +5,16 @@ SURFACE_COMPLEXATION
     # Each surface site can optionally specify plane fractions that
     # sum to unity using the ``planes=`` keyword.  When omitted, the
     # plane coefficients default to ``None``.
-    >FeOH      5.0   planes= 0.5 0.3 0.2
-    >FeOH2     2.0   planes= 0.3 0.4 0.3
+    >FeOH      5.0   planes= 0.5 0.3 0.2   # site with comment
+    >FeOH2     2.0   planes= 0.3 0.4 0.3   ! another comment style
 End
 
 # The electrical double layer properties for each site are defined
 # within an ``edl parameters`` block.  Each entry lists the site name
 # followed by C1, C2 and the relative dielectric constant.
 Begin edl parameters
-  >FeOH   1.0  0.2  78.5
-  >FeOH2  1.5  0.3  80.0
+  # inline comments are ignored
+  >FeOH   1.0  0.2  78.5  # trailing comment
+  >FeOH2  1.5  0.3  80.0  ! second style
 End edl parameters
 
