@@ -106,6 +106,10 @@ REAL(DP)                                      :: faraday
 REAL(DP)                                      :: delta_z
 REAL(DP)                                      :: correct
 REAL(DP)                                      :: Retardation
+REAL(DP)                                      :: psi0, psib, psid
+REAL(DP)                                      :: sigma0_local, sigmab_local, sigmad_local
+REAL(DP)                                      :: sum0, sumb, R0, Rb, Rd, term1
+REAL(DP)                                      :: C1val, C2val
 
 !  Internal integers
 
@@ -129,6 +133,8 @@ INTEGER(I4B)                                  :: jpoint
 INTEGER(I4B)                                  :: nrow
 INTEGER(I4B)                                  :: ncol
 INTEGER(I4B)                                  :: ns
+INTEGER(I4B)                                  :: base, rowR0, rowRb, rowRd
+INTEGER(I4B)                                  :: colpsi0, colpsib, colpsid
 
 REAL(DP)                                                  :: CellVolume
 REAL(DP)                                                  :: MultiplyCell
@@ -144,8 +150,8 @@ source = 0.0
 
 Retardation = 0.001d0*SolidDensity(jinit(jx,jy,jz))*(1.0-por(jx,jy,jz))/( por(jx,jy,jz)*satliq(jx,jy,jz) )
 
-r = 1.0/delt      
-neqn = ncomp + nsurf + nexchange + npot + 1 + 1
+r = 1.0/delt
+neqn = ncomp + nsurf + nexchange + 3*npot
 IF (cylindrical) THEN
   CellVolume = dyy(jy)*pi*( (x(jx)+dxx(jx)/2.0d0 )**2.0d0 - ( x(jx)-dxx(jx)/2.0d0 )**2.0d0  )
   df = 1.0d0
@@ -183,8 +189,58 @@ END DO
 sqrt_sion = SQRT(0.50D0*sum)
 
 DO npt = 1,npot
-  ind = npt+ncomp+nexchange+nsurf
-  fxx(ind) = 0.1174*sqrt_sion*SINH( LogPotential(npt,jx,jy,jz) ) - surfcharge(ksurf(ispot(npt)))
+  base = ncomp + nexchange + nsurf + 3*(npt-1)
+  rowR0 = base + 1
+  rowRb = base + 2
+  rowRd = base + 3
+  psi0 = psi(1,npt,jx,jy,jz)
+  psib = psi(2,npt,jx,jy,jz)
+  psid = psi(3,npt,jx,jy,jz)
+
+  k = ksurf(ispot(npt))
+  correct = wtmin(k)*specificByGrid(k,jx,jy,jz)*volfx(k,jx,jy,jz)/volmol(k)
+  term1 = faraday/correct
+
+  sum0 = 0.0d0
+  sumb = 0.0d0
+  DO is = 1,nsurf
+    IF (ksurf(is) == ksurf(ispot(npt))) THEN
+      sum0 = sum0 + z0_s(is)*spsurf10(is,jx,jy,jz)
+      sumb = sumb + zb_s(is)*spsurf10(is,jx,jy,jz)
+    END IF
+  END DO
+  DO ns = 1,nsurf_sec
+    IF (ksurf(islink(ns)) == ksurf(ispot(npt))) THEN
+      sum0 = sum0 + z0_s(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)
+      sumb = sumb + zb_s(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)
+    END IF
+  END DO
+  sum0 = sum0*term1
+  sumb = sumb*term1
+
+  C1val = C1(npt)
+  C2val = C2(npt)
+
+  sigma0_local = C1val*(psi0 - psib)
+  IF (C2val == 0.0d0) THEN
+     sigmab_local = 0.0d0
+     psib = psid
+  ELSE
+     sigmab_local = C2val*(psib - psid)
+  END IF
+  sigmad_local = 0.1174d0*sqrt_sion*SINH(psid)
+
+  sigma0(npt,jx,jy,jz) = sigma0_local
+  sigmab(npt,jx,jy,jz) = sigmab_local
+  sigmad(npt,jx,jy,jz) = sigmad_local
+
+  R0 = sigma0_local - sum0
+  Rb = sigmab_local - sumb
+  Rd = sigma0_local + sigmab_local + sigmad_local
+
+  fxx(rowR0) = R0
+  fxx(rowRb) = Rb
+  fxx(rowRd) = Rd
 END DO
 
 DO i = 1,ncomp
@@ -290,11 +346,10 @@ DO i = 1,ncomp
     aaa(i,ind2) = surf_accum + rxnmin
   END DO
 
-  DO npt2 = 1,npot
-    ind2 = npt2+ncomp+nexchange+nsurf
-!    rxnmin = sumrd(is2+ncomp+nexchange)
-    aaa(i,ind2) = r*fjpotncomp_local(npt2,i)
-  END DO
+   DO npt2 = 1,3*npot
+     ind2 = npt2+ncomp+nexchange+nsurf
+     aaa(i,ind2) = r*fjpotncomp_local(npt2,i)
+   END DO
       
   IF (isaturate == 1) THEN
     DO i2 = 1,ncomp         
@@ -333,75 +388,78 @@ DO is = 1,nsurf
     aaa(is+ncomp+nexchange,ind2) = surf_accum
   END DO
       
-  DO npt2 = 1,npot
-    ind2 = npt2+ncomp+nexchange+nsurf
-    aaa(is+ncomp+nexchange,ind2) =r*fjpotnsurf_local(npt2,is)
-  END DO
+   DO npt2 = 1,3*npot
+     ind2 = npt2+ncomp+nexchange+nsurf
+     aaa(is+ncomp+nexchange,ind2) = r*fjpotnsurf_local(npt2,is)
+   END DO
 
 END DO     !   End of IS loop
 
 DO npt = 1,npot
-  nrow = npt + ncomp + nexchange + nsurf
+  base = ncomp + nexchange + nsurf + 3*(npt-1)
+  rowR0 = base + 1
+  rowRb = base + 2
+  rowRd = base + 3
   is = ispot(npt)
   k = ksurf(is)
-  correct = wtmin(k)*specificByGrid(k,jx,jy,jz)*volfx(k,jx,jy,jz)/volmol(k) 
- 
+  correct = wtmin(k)*specificByGrid(k,jx,jy,jz)*volfx(k,jx,jy,jz)/volmol(k)
+  term1 = faraday/correct
+
   DO i2 = 1,ncomp
     ind2 = i2
-    sum = 0.0
+    sum0 = 0.0d0
+    sumb = 0.0d0
     DO ns = 1,nsurf_sec
       IF (ksurf(islink(ns)) == ksurf(is)) THEN
-!!      IF (islink(ns) == is) THEN
-        sum = sum - musurf(ns,i2)*zsurf(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*faraday/correct
+        sum0 = sum0 - musurf(ns,i2)*z0_s(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*term1
+        sumb = sumb - musurf(ns,i2)*zb_s(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*term1
       END IF
     END DO
-    aaa(nrow,ind2) = sum
+    aaa(rowR0,ind2) = sum0
+    aaa(rowRb,ind2) = sumb
+    aaa(rowRd,ind2) = 0.0d0
   END DO
 
   DO is2 = 1,nsurf
     ind2 = is2+ncomp+nexchange
-    sum = 0.0
+    sum0 = 0.0d0
+    sumb = 0.0d0
     DO ns = 1,nsurf_sec
       IF (ksurf(islink(ns)) == ksurf(is)) THEN
-!!        IF (islink(ns) == is) THEN
-        sum = sum - musurf(ns,is2+ncomp)*zsurf(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*faraday/correct
+        sum0 = sum0 - musurf(ns,is2+ncomp)*z0_s(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*term1
+        sumb = sumb - musurf(ns,is2+ncomp)*zb_s(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*term1
       END IF
     END DO
-    aaa(nrow,ind2) = sum
+    aaa(rowR0,ind2) = sum0
+    aaa(rowRb,ind2) = sumb
+    aaa(rowRd,ind2) = 0.0d0
     IF (ksurf(is2) == ksurf(is)) THEN
-       aaa(nrow,ind2) =  aaa(nrow,ind2)  &
-             - zsurf(is2)*spsurf10(is2,jx,jy,jz)*faraday/correct
-        END IF
+       aaa(rowR0,ind2) = aaa(rowR0,ind2) - z0_s(is2)*spsurf10(is2,jx,jy,jz)*term1
+       aaa(rowRb,ind2) = aaa(rowRb,ind2) - zb_s(is2)*spsurf10(is2,jx,jy,jz)*term1
+    END IF
   END DO
 
-END DO
+  psi0 = psi(1,npt,jx,jy,jz)
+  psib = psi(2,npt,jx,jy,jz)
+  psid = psi(3,npt,jx,jy,jz)
+  C1val = C1(npt)
+  C2val = C2(npt)
 
-DO npt = 1,npot
-  nrow = npt + ncomp + nexchange + nsurf
-  is = ispot(npt)
-  k = ksurf(is)
-  correct = wtmin(k)*specificByGrid(k,jx,jy,jz)*volfx(k,jx,jy,jz)/volmol(k) 
+  colpsi0 = base + 1
+  colpsib = base + 2
+  colpsid = base + 3
 
-  DO npt2 = 1,npot
-    ncol = npt2 + ncomp + nexchange + nsurf
-    IF (ksurf(ispot(npt)) == ksurf(ispot(npt2))) THEN
-      sum = 0.0
-      DO ns = 1,nsurf_sec
-        delta_z = zsurf(ns+nsurf) - zsurf(islink(ns))
-        IF (islink(ns) == ispot(npt2)) THEN
-          sum = sum - zsurf(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*delta_z*2.0
-        END IF
-      END DO
-    END IF
+  aaa(rowR0,colpsi0) = aaa(rowR0,colpsi0) + C1val
+  aaa(rowR0,colpsib) = aaa(rowR0,colpsib) - C1val
 
-    IF (nrow == ncol) THEN
-      aaa(nrow,ncol) = 0.1174*sqrt_sion*COSH(LogPotential(npt,jx,jy,jz)) -     & 
-             sum*faraday/correct
-    ELSE
-      aaa(nrow,ncol) =  -sum*faraday/correct
-    END IF
+  IF (C2val /= 0.0d0) THEN
+     aaa(rowRb,colpsib) = aaa(rowRb,colpsib) + C2val
+     aaa(rowRb,colpsid) = aaa(rowRb,colpsid) - C2val
+  END IF
 
-  END DO
+  aaa(rowRd,colpsi0) = aaa(rowRd,colpsi0) + C1val
+  aaa(rowRd,colpsib) = aaa(rowRd,colpsib) - C1val + C2val
+  aaa(rowRd,colpsid) = aaa(rowRd,colpsid) - C2val + 0.1174d0*sqrt_sion*COSH(psid)
 
 END DO
 
