@@ -219,6 +219,10 @@ END IF
     READ(iures) VolSaveByTimeStep
     READ(iures) Volsave
     READ(iures) ncounter
+    READ(iures) psi
+    READ(iures) sigma0
+    READ(iures) sigmab
+    READ(iures) sigmad
     !********************************************
     ! Edit by Toshiyuki Bandai 2024 Oct.
     IF (Richards) THEN

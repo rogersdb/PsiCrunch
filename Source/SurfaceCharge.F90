@@ -70,6 +70,9 @@ INTEGER(I4B)                                                :: is
 INTEGER(I4B)                                                :: ik
 INTEGER(I4B)                                                :: k
 INTEGER(I4B)                                                :: npt
+INTEGER(I4B)                                                :: npt_local
+CHARACTER(LEN=13)                                           :: name
+REAL(DP)                                                    :: psi0, psib, psid, phi_s
 
 REAL(DP)                                                    :: sum
 REAL(DP)                                                    :: faraday
@@ -114,6 +117,23 @@ DO npt = 1,npot
       surfcharge(k) = surfcharge(k) + zsurf(ns+nsurf)*spsurf10(ns+nsurf,jx,jy,jz)*term1   !!  Equation 2.1 in Dzombak
     END IF
   END DO
+    DO ns = 1, nsurf + nsurf_sec
+      IF (ns <= nsurf) THEN
+        npt_local = nptPrimary(ns)
+        name = namsurf(ns)
+      ELSE
+        npt_local = nptlink(ns-nsurf)
+        name = namsurf_sec(ns-nsurf)
+      END IF
+      IF (npt_local == npt) THEN
+        psi0 = psi(1,npt,jx,jy,jz)
+        psib = psi(2,npt,jx,jy,jz)
+        psid = psi(3,npt,jx,jy,jz)
+        phi_s = z0_s(ns)*psi0 + zb_s(ns)*psib + zd_s(ns)*psid
+        WRITE(*,'(a13,1x,7(1pe11.4))') name, psi0, psib, psid, sigma0(ns,jx,jy,jz), &
+             sigmab(ns,jx,jy,jz), sigmad(ns,jx,jy,jz), phi_s
+      END IF
+    END DO
 
 !!!  Surface Complexation Cheat Sheet    
 !!!    kPotential(k) --> Logical to EDL potential

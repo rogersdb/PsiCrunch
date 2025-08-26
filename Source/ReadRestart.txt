@@ -56,5 +56,9 @@
     READ(iures) pres
     READ(iures) ActiveCell
     READ(iures) VolSaveByTimeStep
-    READ(iures) Volsave
-    READ(iures) ncounter
+    READ(iures) Volsave
+    READ(iures) ncounter
+    READ(iures) psi
+    READ(iures) sigma0
+    READ(iures) sigmab
+    READ(iures) sigmad
