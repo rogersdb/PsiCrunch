@@ -7,10 +7,10 @@ functionality for unit testing.
 """
 from __future__ import annotations
 
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 
-def parse_planes_line(line: str) -> Dict[str, Tuple[float, float, float]]:
+def parse_planes_line(line: str) -> Dict[str, Optional[Tuple[float, float, float]]]:
     """Parse a line containing the optional ``planes=`` syntax.
 
     Parameters
@@ -24,14 +24,16 @@ def parse_planes_line(line: str) -> Dict[str, Tuple[float, float, float]]:
     -------
     dict
         Mapping with keys ``site``, ``z`` (the zeta potential) and
-        ``planes`` containing a tuple of the three plane coefficients.
+        ``planes`` containing a tuple of the three plane coefficients if
+        provided.  When the ``planes=`` specification is absent, the
+        ``planes`` entry is ``None``.
     """
     tokens = line.strip().split()
     if len(tokens) < 2:
         raise ValueError("line missing site or z value")
     site = tokens[0]
     z = float(tokens[1])
-    planes = (None, None, None)
+    planes: Optional[Tuple[float, float, float]] = None
 
     tokens_lower = [t.lower() for t in tokens]
     for idx, tok in enumerate(tokens_lower):
