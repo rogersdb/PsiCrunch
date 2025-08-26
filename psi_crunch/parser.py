@@ -70,8 +70,14 @@ def parse_edl_block(lines: Iterable[str]) -> Dict[str, Tuple[float, float, float
     -------
     dict
         Mapping from surface site names to ``(C1, C2, eps_r)`` tuples.
+
+    Raises
+    ------
+    ValueError
+        If the block is not terminated by ``End edl parameters`` or if any
+        line inside the block does not contain exactly three numeric values.
     """
-    capture = False
+    in_block = False
     params: Dict[str, Tuple[float, float, float]] = {}
     for raw in lines:
         line = raw.strip()
@@ -79,14 +85,21 @@ def parse_edl_block(lines: Iterable[str]) -> Dict[str, Tuple[float, float, float
             continue
         lower = line.lower()
         if lower.startswith('begin edl parameters'):
-            capture = True
+            in_block = True
             continue
         if lower.startswith('end edl parameters'):
+            in_block = False
             break
-        if capture:
+        if in_block:
             parts = line.split()
-            if len(parts) >= 4:
-                site = parts[0]
+            if len(parts) != 4:
+                raise ValueError(f"malformed line in edl parameters: {line!r}")
+            site = parts[0]
+            try:
                 values = tuple(float(p) for p in parts[1:4])
-                params[site] = values
+            except ValueError as exc:
+                raise ValueError(f"malformed line in edl parameters: {line!r}") from exc
+            params[site] = values
+    if in_block:
+        raise ValueError("edl parameters block missing 'End edl parameters'")
     return params
