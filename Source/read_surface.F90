@@ -1,17 +1,17 @@
 !!! *** Copyright Notice ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
-!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).† All rights reserved.
-!!!†
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
+!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).¬† All rights reserved.
+!!!¬†
 !!! If you have questions about your rights to use or distribute this software, please contact 
-!!! Berkeley Lab's Innovation & Partnerships Office at††IPO@lbl.gov.
-!!!†
-!!! NOTICE.† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
+!!! Berkeley Lab's Innovation & Partnerships Office at¬†¬†IPO@lbl.gov.
+!!!¬†
+!!! NOTICE.¬† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
 !!! consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting 
 !!! on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, 
 !!! prepare derivative works, and perform publicly and display publicly, and to permit other to do so.
 !!!
 !!! *** License Agreement ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
 !!! subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved."
 !!! 
 !!! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -173,3 +173,97 @@ GO TO 100
 RETURN
 
 END SUBROUTINE read_surface
+
+!*********************************************************************
+! New parser for optional electrical double layer (EDL) parameters
+! The block is expected to appear in the database as
+!   Begin edl parameters
+!   <site>  C1  C2  eps_r
+!   ...
+!   End edl parameters
+! The routine maps each entry to an existing surface site and stores the
+! capacitance values and dielectric constant.
+!*********************************************************************
+SUBROUTINE read_edl_parameters(iunit,nsurf,nsurf_sec)
+  USE crunchtype
+  USE params
+  USE concentration
+  USE strings
+  USE CrunchFunctions
+
+  IMPLICIT NONE
+
+  INTEGER(I4B), INTENT(IN) :: iunit
+  INTEGER(I4B), INTENT(IN) :: nsurf
+  INTEGER(I4B), INTENT(IN) :: nsurf_sec
+
+  CHARACTER (LEN=mls) :: line
+  CHARACTER (LEN=mls) :: name
+  INTEGER(I4B) :: ifind
+  INTEGER(I4B) :: id, iff, ids, ls
+  INTEGER(I4B) :: is, ns, idx
+  REAL(DP) :: val1, val2, val3
+
+  ! Initialize in case block is absent
+  IF (.NOT. ALLOCATED(C1)) RETURN
+  C1 = 0.0d0
+  C2 = 0.0d0
+  eps_r = 0.0d0
+
+  REWIND iunit
+  line = 'Begin edl parameters'
+  CALL find_string(iunit,line,ifind)
+  IF (ifind == 0) THEN
+    REWIND iunit
+    RETURN
+  END IF
+
+  DO
+    READ(iunit,'(a)',END=100) line
+    IF (line == 'End edl parameters') EXIT
+    id = 1
+    iff = mls
+    CALL sschaine(line,id,iff,ssch,ids,ls)
+    IF (ls == 0) CYCLE
+    name = ssch
+    idx = 0
+    DO is = 1,nsurf
+      IF (name == namsurf(is)) THEN
+        idx = is
+        EXIT
+      END IF
+    END DO
+    IF (idx == 0) THEN
+      DO ns = 1,nsurf_sec
+        IF (name == namsurf_sec(ns)) THEN
+          idx = ns + nsurf
+          EXIT
+        END IF
+      END DO
+    END IF
+    IF (idx == 0) CYCLE
+
+    id = ids + ls
+    CALL sschaine(line,id,iff,ssch,ids,ls)
+    IF (ls /= 0) THEN
+      val1 = DNUM(ssch)
+      id = ids + ls
+      CALL sschaine(line,id,iff,ssch,ids,ls)
+      IF (ls /= 0) THEN
+        val2 = DNUM(ssch)
+        id = ids + ls
+        CALL sschaine(line,id,iff,ssch,ids,ls)
+        IF (ls /= 0) THEN
+          val3 = DNUM(ssch)
+          C1(idx) = val1
+          C2(idx) = val2
+          eps_r(idx) = val3
+        END IF
+      END IF
+    END IF
+  END DO
+
+100 CONTINUE
+  REWIND iunit
+
+END SUBROUTINE read_edl_parameters

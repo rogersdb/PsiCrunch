@@ -169,6 +169,12 @@ MODULE  concentration
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: alogkp
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: wtaq
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: zsurf
+  REAL(DP), DIMENSION(:), ALLOCATABLE              :: z0_s
+  REAL(DP), DIMENSION(:), ALLOCATABLE              :: zb_s
+  REAL(DP), DIMENSION(:), ALLOCATABLE              :: zd_s
+  REAL(DP), DIMENSION(:), ALLOCATABLE              :: C1
+  REAL(DP), DIMENSION(:), ALLOCATABLE              :: C2
+  REAL(DP), DIMENSION(:), ALLOCATABLE              :: eps_r
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: satkin
   REAL(DP), DIMENSION(:,:), ALLOCATABLE            :: spexb
   REAL(DP), DIMENSION(:,:), ALLOCATABLE            :: spsurfb
