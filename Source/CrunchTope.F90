@@ -3423,7 +3423,11 @@ END IF
     WRITE(iures) VolSaveByTimeStep
     WRITE(iures) Volsave
     WRITE(iures) ncounter
-    
+    WRITE(iures) psi
+    WRITE(iures) sigma0
+    WRITE(iures) sigmab
+    WRITE(iures) sigmad
+
     !********************************************
     ! Edit by Toshiyuki Bandai 2023 May
     IF (Richards) THEN

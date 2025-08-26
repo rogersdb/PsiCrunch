@@ -56,5 +56,9 @@
     WRITE(iures) pres
     WRITE(iures) ActiveCell
     WRITE(iures) VolSaveByTimeStep
-    WRITE(iures) Volsave
-    WRITE(iures) ncounter
+    WRITE(iures) Volsave
+    WRITE(iures) ncounter
+    WRITE(iures) psi
+    WRITE(iures) sigma0
+    WRITE(iures) sigmab
+    WRITE(iures) sigmad

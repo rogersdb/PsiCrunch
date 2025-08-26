@@ -1,17 +1,17 @@
 !!! *** Copyright Notice ***
-!!! “CrunchFlow”, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
-!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
-!!! 
+!!! â€œCrunchFlowâ€, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
+!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).Â  All rights reserved.
+!!!Â 
 !!! If you have questions about your rights to use or distribute this software, please contact 
-!!! Berkeley Lab's Innovation & Partnerships Office at  IPO@lbl.gov.
-!!! 
-!!! NOTICE.  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
+!!! Berkeley Lab's Innovation & Partnerships Office atÂ Â IPO@lbl.gov.
+!!!Â 
+!!! NOTICE.Â  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
 !!! consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting 
 !!! on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, 
 !!! prepare derivative works, and perform publicly and display publicly, and to permit other to do so.
 !!!
 !!! *** License Agreement ***
-!!! “CrunchFlow”, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
+!!! â€œCrunchFlowâ€, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
 !!! subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved."
 !!! 
 !!! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -158,6 +158,8 @@ REAL(DP)                                                   :: bot_norm
 REAL(DP)                                                   :: aflux_net
 REAL(DP)                                                   :: ad_net_bot
 REAL(DP)                                                   :: SolidSolutionRatioTemp
+REAL(DP)                                                   :: psi0_local, psib_local, psid_local
+REAL(DP)                                                   :: phi_s_local
 
 CHARACTER (LEN=mls)                                        :: namtemp
 
@@ -349,6 +351,30 @@ DO jz = 1,nz
         END DO  
       
       END IF
+      IF (npot > 0) THEN
+        WRITE(8,*)
+        WRITE(8,*) 'Plane charge diagnostics'
+        DO ns = 1, nsurf + nsurf_sec
+          IF (ns <= nsurf) THEN
+            npt = nptPrimary(ns)
+          ELSE
+            npt = nptlink(ns-nsurf)
+          END IF
+          IF (npt /= 0) THEN
+            psi0_local = psi(1,npt,jx,jy,jz)
+            psib_local = psi(2,npt,jx,jy,jz)
+            psid_local = psi(3,npt,jx,jy,jz)
+          ELSE
+            psi0_local = 0.0d0
+            psib_local = 0.0d0
+            psid_local = 0.0d0
+          END IF
+          phi_s_local = z0_s(ns)*psi0_local + zb_s(ns)*psib_local + zd_s(ns)*psid_local
+          WRITE(8,'(a13,1x,7(1pe11.4))') prtsurf(ns), psi0_local, psib_local, psid_local, &
+                 sigma0(ns,jx,jy,jz), sigmab(ns,jx,jy,jz), sigmad(ns,jx,jy,jz), phi_s_local
+        END DO
+      END IF
+
     
 !!!  Surface Complexation Cheat Sheet    
 !!!    kPotential(k) --> Logical to EDL potential
@@ -435,6 +461,30 @@ DO jz = 1,nz
           actprint = 0.0d0
           actprint10 = 0.0d0 
         END IF
+
+      IF (npot > 0) THEN
+        WRITE(8,*)
+        WRITE(8,*) 'Plane charge diagnostics'
+        DO ns = 1, nsurf + nsurf_sec
+          IF (ns <= nsurf) THEN
+            npt = nptPrimary(ns)
+          ELSE
+            npt = nptlink(ns-nsurf)
+          END IF
+          IF (npt != 0) THEN
+            psi0_local = psi(1,npt,jx,jy,jz)
+            psib_local = psi(2,npt,jx,jy,jz)
+            psid_local = psi(3,npt,jx,jy,jz)
+          ELSE
+            psi0_local = 0.0d0
+            psib_local = 0.0d0
+            psid_local = 0.0d0
+          END IF
+          phi_s_local = z0_s(ns)*psi0_local + zb_s(ns)*psib_local + zd_s(ns)*psid_local
+          WRITE(8,'(a13,1x,7(1pe11.4))') prtsurf(ns), psi0_local, psib_local, psid_local, &
+                 sigma0(ns,jx,jy,jz), sigmab(ns,jx,jy,jz), sigmad(ns,jx,jy,jz), phi_s_local
+        END DO
+      END IF
 
         WRITE(8,212) namsurf(is),spprint,actprint,spsurf10(is,jx,jy,jz)/AqueousToBulk,spsurf10(is,jx,jy,jz),actprint10,namtemp
       END DO
