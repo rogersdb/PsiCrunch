@@ -1,17 +1,17 @@
 !!! *** Copyright Notice ***
-!!! “CrunchFlow”, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
-!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
-!!! 
+!!! â€œCrunchFlowâ€, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
+!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).Â  All rights reserved.
+!!!Â 
 !!! If you have questions about your rights to use or distribute this software, please contact 
-!!! Berkeley Lab's Innovation & Partnerships Office at  IPO@lbl.gov.
-!!! 
-!!! NOTICE.  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
+!!! Berkeley Lab's Innovation & Partnerships Office atÂ Â IPO@lbl.gov.
+!!!Â 
+!!! NOTICE.Â  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
 !!! consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting 
 !!! on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, 
 !!! prepare derivative works, and perform publicly and display publicly, and to permit other to do so.
 !!!
 !!! *** License Agreement ***
-!!! “CrunchFlow”, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
+!!! â€œCrunchFlowâ€, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
 !!! subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved."
 !!! 
 !!! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -52,6 +52,7 @@ USE temperature
 USE temperature
 USE io
 USE strings
+USE CrunchFunctions
 
 IMPLICIT NONE
 
@@ -161,6 +162,7 @@ REAL(DP), DIMENSION(:,:), ALLOCATABLE                              :: coef
 CHARACTER (LEN=mls)                                                :: parchar
 CHARACTER (LEN=mls)                                                :: parfind
 REAL(DP)                                                           :: realjunk
+REAL(DP)                                                           :: sum_planes
 INTEGER(I4B)                                                       :: lchar
 
 CHARACTER (LEN=50)                                                 :: label
@@ -735,6 +737,36 @@ IF (nsurf > 0) THEN
     DEALLOCATE(zsurf)
   END IF
   ALLOCATE(zsurf(nsurf+nsurf_sec))
+  IF (ALLOCATED(z0_s)) THEN
+    DEALLOCATE(z0_s)
+  END IF
+  IF (ALLOCATED(zb_s)) THEN
+    DEALLOCATE(zb_s)
+  END IF
+  IF (ALLOCATED(zd_s)) THEN
+    DEALLOCATE(zd_s)
+  END IF
+  IF (ALLOCATED(C1)) THEN
+    DEALLOCATE(C1)
+  END IF
+  IF (ALLOCATED(C2)) THEN
+    DEALLOCATE(C2)
+  END IF
+  IF (ALLOCATED(eps_r)) THEN
+    DEALLOCATE(eps_r)
+  END IF
+  ALLOCATE(z0_s(nsurf+nsurf_sec))
+  ALLOCATE(zb_s(nsurf+nsurf_sec))
+  ALLOCATE(zd_s(nsurf+nsurf_sec))
+  ALLOCATE(C1(nsurf+nsurf_sec))
+  ALLOCATE(C2(nsurf+nsurf_sec))
+  ALLOCATE(eps_r(nsurf+nsurf_sec))
+  z0_s = 0.0d0
+  zb_s = 0.0d0
+  zd_s = 0.0d0
+  C1 = 0.0d0
+  C2 = 0.0d0
+  eps_r = 0.0d0
   !!!CLOSE(nout,STATUS='delete')
   OPEN(UNIT=iunit5,FILE=data1,STATUS='old',ERR=334)
   !!!OPEN(UNIT=nout,FILE='CrunchJunk2.out',STATUS='unknown') 
@@ -757,15 +789,59 @@ IF (nsurf > 0) THEN
     GO TO 602
   END IF
 
-  DO is = 1,nsurf
+      DO is = 1,nsurf
     namtemp = namsurf(is)
     CALL stringlen(namtemp,ls)
     REWIND nout
-    parchar = namtemp
-    parfind = ' '
-    realjunk = 0.0
-    CALL readCaseSensitivePar(nout,lchar,parchar,parfind,realjunk,section)
-    IF (parfind == ' ') THEN  ! Parameter timestep_max not found
+    found = .FALSE.
+1000 CONTINUE
+    READ(nout,'(a)',END=1010) zone
+    id = 1
+    iff = mls
+    CALL sschaine(zone,id,iff,ssch,ids,ls)
+    IF (ls /= 0) THEN
+      IF (ssch == namtemp) THEN
+        found = .TRUE.
+        id = ids + ls
+        CALL sschaine(zone,id,iff,ssch,ids,ls)
+        lzs = ls
+        CALL convan(ssch,lzs,res)
+        IF (res /= 'n') THEN
+          WRITE(*,*)
+          WRITE(*,*) '    Surface complex parameter must be numeric'
+          WRITE(*,*) '    Searching for: ', namtemp(1:ls)
+          WRITE(*,*)
+          READ(*,*)
+          STOP
+        END IF
+        zsurf(is) = DNUM(ssch)
+        id = ids + ls
+        CALL sschaine(zone,id,iff,ssch,ids,ls)
+        IF (ls /= 0 .AND. ssch == 'planes') THEN
+          id = ids + ls
+          CALL sschaine(zone,id,iff,ssch,ids,ls)
+          IF (ssch == '=') THEN
+            id = ids + ls
+            CALL sschaine(zone,id,iff,ssch,ids,ls)
+          END IF
+          z0_s(is) = DNUM(ssch)
+          id = ids + ls
+          CALL sschaine(zone,id,iff,ssch,ids,ls)
+          zb_s(is) = DNUM(ssch)
+          id = ids + ls
+          CALL sschaine(zone,id,iff,ssch,ids,ls)
+          zd_s(is) = DNUM(ssch)
+          sum_planes = z0_s(is) + zb_s(is) + zd_s(is)
+          IF (ABS(sum_planes-1.0d0) > 1.0d-6) THEN
+            WRITE(*,*) ' Warning: planes coefficients for ', namtemp(1:ls), ' do not sum to unity'
+          END IF
+        END IF
+        GO TO 1010
+      END IF
+    END IF
+    GO TO 1000
+1010 CONTINUE
+    IF (.NOT. found) THEN
       WRITE(*,*)
       WRITE(*,*) '    Surface complex parameters not found in database '
       WRITE(*,*) '    Looking in database file'
@@ -773,20 +849,62 @@ IF (nsurf > 0) THEN
       WRITE(*,*)
       READ(*,*)
       STOP
-    ELSE
-      zsurf(is) = realjunk
     END IF
   END DO
 
-  DO ns = 1,nsurf_sec
+      DO ns = 1,nsurf_sec
     namtemp = namsurf_sec(ns)
     CALL stringlen(namtemp,ls)
     REWIND nout
-    parchar = namtemp
-    parfind = ' '
-    realjunk = 0.0
-    CALL readCaseSensitivePar(nout,lchar,parchar,parfind,realjunk,section)
-    IF (parfind == ' ') THEN  ! Parameter timestep_max not found
+    found = .FALSE.
+2000 CONTINUE
+    READ(nout,'(a)',END=2010) zone
+    id = 1
+    iff = mls
+    CALL sschaine(zone,id,iff,ssch,ids,ls)
+    IF (ls /= 0) THEN
+      IF (ssch == namtemp) THEN
+        found = .TRUE.
+        id = ids + ls
+        CALL sschaine(zone,id,iff,ssch,ids,ls)
+        lzs = ls
+        CALL convan(ssch,lzs,res)
+        IF (res /= 'n') THEN
+          WRITE(*,*)
+          WRITE(*,*) '    Surface complex parameter must be numeric'
+          WRITE(*,*) '    Searching for: ', namtemp(1:ls)
+          WRITE(*,*)
+          READ(*,*)
+          STOP
+        END IF
+        zsurf(ns+nsurf) = DNUM(ssch)
+        id = ids + ls
+        CALL sschaine(zone,id,iff,ssch,ids,ls)
+        IF (ls /= 0 .AND. ssch == 'planes') THEN
+          id = ids + ls
+          CALL sschaine(zone,id,iff,ssch,ids,ls)
+          IF (ssch == '=') THEN
+            id = ids + ls
+            CALL sschaine(zone,id,iff,ssch,ids,ls)
+          END IF
+          z0_s(ns+nsurf) = DNUM(ssch)
+          id = ids + ls
+          CALL sschaine(zone,id,iff,ssch,ids,ls)
+          zb_s(ns+nsurf) = DNUM(ssch)
+          id = ids + ls
+          CALL sschaine(zone,id,iff,ssch,ids,ls)
+          zd_s(ns+nsurf) = DNUM(ssch)
+          sum_planes = z0_s(ns+nsurf) + zb_s(ns+nsurf) + zd_s(ns+nsurf)
+          IF (ABS(sum_planes-1.0d0) > 1.0d-6) THEN
+            WRITE(*,*) ' Warning: planes coefficients for ', namtemp(1:ls), ' do not sum to unity'
+          END IF
+        END IF
+        GO TO 2010
+      END IF
+    END IF
+    GO TO 2000
+2010 CONTINUE
+    IF (.NOT. found) THEN
       WRITE(*,*)
       WRITE(*,*) '    Surface complex parameters not found in database '
       WRITE(*,*) '    Looking in database file'
@@ -794,12 +912,10 @@ IF (nsurf > 0) THEN
       WRITE(*,*)
       READ(*,*)
       STOP
-    ELSE
-      zsurf(ns+nsurf) = realjunk
     END IF
-
   END DO
 
+  CALL read_edl_parameters(iunit5,nsurf,nsurf_sec)
   CLOSE(iunit5,STATUS='keep')
 
 END IF
