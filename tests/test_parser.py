@@ -43,10 +43,11 @@ def test_parse_edl_block():
         "  >FeOH2  1.5  0.3  80.0",
         "End edl parameters",
     ]
-    params = parse_edl_block(lines)
+    params, unmatched = parse_edl_block(lines)
     assert params[">FeOH"] == (1.0, 0.2, 78.5)
     assert params[">FeOH2"] == (1.5, 0.3, 80.0)
     assert len(params) == 2
+    assert unmatched == []
 
 
 def test_parse_edl_block_with_comments():
@@ -57,10 +58,11 @@ def test_parse_edl_block_with_comments():
         "  >FeOH2  1.5  0.3  80.0  ! another",
         "End edl parameters  # end comment",
     ]
-    params = parse_edl_block(lines)
+    params, unmatched = parse_edl_block(lines)
     assert params[">FeOH"] == (1.0, 0.2, 78.5)
     assert params[">FeOH2"] == (1.5, 0.3, 80.0)
     assert len(params) == 2
+    assert unmatched == []
 
 
 def test_parse_edl_block_case_insensitive_markers():
@@ -69,9 +71,10 @@ def test_parse_edl_block_case_insensitive_markers():
         "  >FeOH   1.0  0.2  78.5",
         "EnD EdL PaRaMeTeRs",
     ]
-    params = parse_edl_block(lines)
+    params, unmatched = parse_edl_block(lines)
     assert params[">FeOH"] == (1.0, 0.2, 78.5)
     assert len(params) == 1
+    assert unmatched == []
 
 
 def test_parse_edl_block_missing_end():
@@ -91,4 +94,18 @@ def test_parse_edl_block_malformed_line():
     ]
     with pytest.raises(ValueError):
         parse_edl_block(lines)
+
+
+def test_parse_edl_block_unmatched():
+    lines = [
+        "Begin edl parameters",
+        "  >FeOH   1.0  0.2  78.5",
+        "  >Unknown 1.1 0.2 78.5",
+        "End edl parameters",
+    ]
+    with pytest.warns(RuntimeWarning):
+        params, unmatched = parse_edl_block(lines, known_sites=[">FeOH"])
+    assert ">FeOH" in params
+    assert ">Unknown" not in params
+    assert unmatched == [">Unknown"]
 

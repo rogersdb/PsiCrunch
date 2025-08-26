@@ -203,6 +203,8 @@ SUBROUTINE read_edl_parameters(iunit,nsurf,nsurf_sec)
   INTEGER(I4B) :: ifind
   INTEGER(I4B) :: id, iff, ids, ls
   INTEGER(I4B) :: is, ns, idx
+  INTEGER(I4B) :: n_unmatched
+  CHARACTER(LEN=mls), ALLOCATABLE :: unmatched_sites(:)
   REAL(DP) :: val1, val2, val3
 
   ! Initialize in case block is absent
@@ -218,6 +220,9 @@ SUBROUTINE read_edl_parameters(iunit,nsurf,nsurf_sec)
     REWIND iunit
     RETURN
   END IF
+
+  ALLOCATE(unmatched_sites(nsurf+nsurf_sec))
+  n_unmatched = 0
 
   DO
     READ(iunit,'(a)',END=100) line
@@ -244,7 +249,13 @@ SUBROUTINE read_edl_parameters(iunit,nsurf,nsurf_sec)
         END IF
       END DO
     END IF
-    IF (idx == 0) CYCLE
+    IF (idx == 0) THEN
+      n_unmatched = n_unmatched + 1
+      IF (n_unmatched <= SIZE(unmatched_sites)) THEN
+        unmatched_sites(n_unmatched) = name
+      END IF
+      CYCLE
+    END IF
 
     id = ids + ls
     CALL sschaine(line,id,iff,ssch,ids,ls)
@@ -267,6 +278,13 @@ SUBROUTINE read_edl_parameters(iunit,nsurf,nsurf_sec)
   END DO
 
 100 CONTINUE
+  IF (n_unmatched > 0) THEN
+    DO is = 1, MIN(n_unmatched, SIZE(unmatched_sites))
+      WRITE(*,*) ' Warning: edl parameters entry for unknown site ', &
+                  TRIM(unmatched_sites(is))
+    END DO
+  END IF
+  IF (ALLOCATED(unmatched_sites)) DEALLOCATE(unmatched_sites)
   REWIND iunit
 
 END SUBROUTINE read_edl_parameters
