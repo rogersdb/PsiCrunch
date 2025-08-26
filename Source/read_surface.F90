@@ -198,6 +198,7 @@ SUBROUTINE read_edl_parameters(iunit,nsurf,nsurf_sec)
   INTEGER(I4B), INTENT(IN) :: nsurf_sec
 
   CHARACTER (LEN=mls) :: line
+  CHARACTER (LEN=mls) :: line_lower
   CHARACTER (LEN=mls) :: name
   INTEGER(I4B) :: ifind
   INTEGER(I4B) :: id, iff, ids, ls
@@ -220,7 +221,9 @@ SUBROUTINE read_edl_parameters(iunit,nsurf,nsurf_sec)
 
   DO
     READ(iunit,'(a)',END=100) line
-    IF (line == 'End edl parameters') EXIT
+    line_lower = line
+    CALL majuscules(line_lower,LEN_TRIM(line_lower))
+    IF (line_lower == 'end edl parameters') EXIT
     id = 1
     iff = mls
     CALL sschaine(line,id,iff,ssch,ids,ls)
