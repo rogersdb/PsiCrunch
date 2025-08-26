@@ -9,6 +9,18 @@ def test_parse_planes_line():
     assert result["planes"] == (0.5, 0.3, 0.2)
 
 
+def test_parse_planes_line_uppercase():
+    line = ">FeOH 5.0 PLANES= 0.5 0.3 0.2"
+    result = parse_planes_line(line)
+    assert result["planes"] == (0.5, 0.3, 0.2)
+
+
+def test_parse_planes_line_attached_value():
+    line = ">FeOH 5.0 planes=0.5 0.3 0.2"
+    result = parse_planes_line(line)
+    assert result["planes"] == (0.5, 0.3, 0.2)
+
+
 def test_parse_edl_block():
     lines = [
         "irrelevant line",

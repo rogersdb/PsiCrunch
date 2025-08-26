@@ -32,12 +32,26 @@ def parse_planes_line(line: str) -> Dict[str, Tuple[float, float, float]]:
     site = tokens[0]
     z = float(tokens[1])
     planes = (None, None, None)
-    if 'planes=' in tokens:
-        idx = tokens.index('planes=') + 1
-        try:
-            planes = tuple(float(tokens[idx + i]) for i in range(3))
-        except (IndexError, ValueError) as exc:  # pragma: no cover - defensive
-            raise ValueError("invalid planes specification") from exc
+
+    tokens_lower = [t.lower() for t in tokens]
+    for idx, tok in enumerate(tokens_lower):
+        if tok == 'planes=':
+            start = idx + 1
+            try:
+                planes = tuple(float(tokens[start + i]) for i in range(3))
+            except (IndexError, ValueError) as exc:  # pragma: no cover - defensive
+                raise ValueError("invalid planes specification") from exc
+            break
+        elif tok.startswith('planes='):
+            first = tokens[idx][len('planes='):]
+            try:
+                planes = tuple(
+                    float(val) for val in [first] + tokens[idx + 1 : idx + 3]
+                )
+            except (IndexError, ValueError) as exc:  # pragma: no cover - defensive
+                raise ValueError("invalid planes specification") from exc
+            break
+
     return {'site': site, 'z': z, 'planes': planes}
 
 
