@@ -20,6 +20,8 @@ def gouy_chapman_potential(ionic_strength: float, surface_charge: float) -> floa
 
 def constant_capacitance(ionic_strength: float, surface_charge: float, capacitance: float) -> float:
     """Constant Capacitance Model (CCM) potential."""
+    if capacitance <= 0:
+        raise ValueError("capacitance must be positive")
     return surface_charge / capacitance
 
 
@@ -29,4 +31,8 @@ def triple_layer(ionic_strength: float, surface_charge: float, C1: float, C2: fl
     A toy implementation where the effective capacitance increases with
     ionic strength through the Stern layer capacitor ``C2``.
     """
+    if C1 <= 0:
+        raise ValueError("C1 must be positive")
+    if C2 <= 0:
+        raise ValueError("C2 must be positive")
     return surface_charge / (C1 + C2 * ionic_strength)
