@@ -2543,8 +2543,9 @@ END DO
 !!!    ksurf(islink(ns)) --> This would point from a secondary surface complex (ns) to a primary (islink(ns)) complex to a mineral
 !!!    nptlink(ns) --> pointer of surface complex (secondary) to potential (npt)
 
-!!!neqn = ncomp + nsurf + nexchange + npot + 1 + 1   [For now, "equilib.F90' will not consider the two new unknowns]
-neqn = ncomp + nsurf + nexchange + npot
+!!!neqn = ncomp + nsurf + nexchange + npot + 1 + 1   [For now, "equilib.F90" will not consider the two new unknowns]
+!!!Three unknowns are inserted for each potential set
+neqn = ncomp + nsurf + nexchange + 3*npot
 
 !  Temporary arrays deallocated later in START98
 

@@ -276,11 +276,11 @@ IF (ierode == 1) THEN
   IF (ALLOCATED(fjpotncomp)) THEN
     DEALLOCATE(fjpotncomp)
   END IF
-  ALLOCATE(fjpotncomp(npot,ncomp,nx,ny,nz))
+  ALLOCATE(fjpotncomp(3*npot,ncomp,nx,ny,nz))
   IF (ALLOCATED(fjpotnsurf)) THEN
     DEALLOCATE(fjpotnsurf)
   END IF
-  ALLOCATE(fjpotnsurf(npot,nsurf,nx,ny,nz))
+  ALLOCATE(fjpotnsurf(3*npot,nsurf,nx,ny,nz))
 
 
 
@@ -321,11 +321,11 @@ ELSE IF (ierode /= 1) THEN
   IF (ALLOCATED(fjpotncomp)) THEN
     DEALLOCATE(fjpotncomp)
   END IF
-  ALLOCATE(fjpotncomp(npot,ncomp,nx,ny,nz))
+  ALLOCATE(fjpotncomp(3*npot,ncomp,nx,ny,nz))
   IF (ALLOCATED(fjpotnsurf)) THEN
     DEALLOCATE(fjpotnsurf)
   END IF
-  ALLOCATE(fjpotnsurf(npot,nsurf,nx,ny,nz))
+  ALLOCATE(fjpotnsurf(3*npot,nsurf,nx,ny,nz))
   IF (ALLOCATED(LogPotential)) THEN
     DEALLOCATE(LogPotential)
   END IF

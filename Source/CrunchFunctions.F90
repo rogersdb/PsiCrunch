@@ -1,17 +1,17 @@
 !!! *** Copyright Notice ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
-!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).† All rights reserved.
-!!!†
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
+!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).¬† All rights reserved.
+!!!¬†
 !!! If you have questions about your rights to use or distribute this software, please contact 
-!!! Berkeley Lab's Innovation & Partnerships Office at††IPO@lbl.gov.
-!!!†
-!!! NOTICE.† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
+!!! Berkeley Lab's Innovation & Partnerships Office at¬†¬†IPO@lbl.gov.
+!!!¬†
+!!! NOTICE.¬† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
 !!! consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting 
 !!! on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, 
 !!! prepare derivative works, and perform publicly and display publicly, and to permit other to do so.
 !!!
 !!! *** License Agreement ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
 !!! subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved."
 !!! 
 !!! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -175,5 +175,20 @@ REAL(DP), DIMENSION(size(a),size(b))                       :: outerprod
 
 outerprod = spread(a,dim=2,ncopies=size(b)) * spread(b,dim=1,ncopies=size(a))
 END FUNCTION outerprod
+
+PURE FUNCTION PlaneMajorOffset(iplane,p,npot,ncells)
+USE crunchtype
+INTEGER(I4B), INTENT(IN) :: iplane,p,npot,ncells
+INTEGER(I4B)             :: PlaneMajorOffset
+PlaneMajorOffset = ((iplane-1)*npot + (p-1))*ncells
+END FUNCTION PlaneMajorOffset
+
+PURE FUNCTION PlaneMajorIndex(iplane,p,cell,npot,ncells)
+USE crunchtype
+INTEGER(I4B), INTENT(IN) :: iplane,p,cell,npot,ncells
+INTEGER(I4B)             :: PlaneMajorIndex
+PlaneMajorIndex = PlaneMajorOffset(iplane,p,npot,ncells) + cell
+END FUNCTION PlaneMajorIndex
+
 
 END MODULE CrunchFunctions
