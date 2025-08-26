@@ -2650,6 +2650,58 @@ IF (ALLOCATED(spcondsurf10)) THEN
 ELSE
   ALLOCATE(spcondsurf10(nsurf+nsurf_sec,mchem))
 END IF
+IF (ALLOCATED(z0_s)) THEN
+  DEALLOCATE(z0_s)
+END IF
+IF (ALLOCATED(zb_s)) THEN
+  DEALLOCATE(zb_s)
+END IF
+IF (ALLOCATED(zd_s)) THEN
+  DEALLOCATE(zd_s)
+END IF
+IF (ALLOCATED(C1)) THEN
+  DEALLOCATE(C1)
+END IF
+IF (ALLOCATED(C2)) THEN
+  DEALLOCATE(C2)
+END IF
+IF (ALLOCATED(eps_r)) THEN
+  DEALLOCATE(eps_r)
+END IF
+IF (ALLOCATED(psi)) THEN
+  DEALLOCATE(psi)
+END IF
+IF (ALLOCATED(sigma0)) THEN
+  DEALLOCATE(sigma0)
+END IF
+IF (ALLOCATED(sigmab)) THEN
+  DEALLOCATE(sigmab)
+END IF
+IF (ALLOCATED(sigmad)) THEN
+  DEALLOCATE(sigmad)
+END IF
+
+ALLOCATE(z0_s(nsurf+nsurf_sec))
+ALLOCATE(zb_s(nsurf+nsurf_sec))
+ALLOCATE(zd_s(nsurf+nsurf_sec))
+ALLOCATE(C1(nsurf+nsurf_sec))
+ALLOCATE(C2(nsurf+nsurf_sec))
+ALLOCATE(eps_r(nsurf+nsurf_sec))
+ALLOCATE(psi(3,nsurf+nsurf_sec,0:nx+1,ny,nz))
+ALLOCATE(sigma0(nsurf+nsurf_sec,0:nx+1,ny,nz))
+ALLOCATE(sigmab(nsurf+nsurf_sec,0:nx+1,ny,nz))
+ALLOCATE(sigmad(nsurf+nsurf_sec,0:nx+1,ny,nz))
+
+z0_s = 0.0d0
+zb_s = 0.0d0
+zd_s = 0.0d0
+C1   = 0.0d0
+C2   = 0.0d0
+eps_r = 0.0d0
+psi    = 0.0d0
+sigma0 = 0.0d0
+sigmab = 0.0d0
+sigmad = 0.0d0
 IF (ALLOCATED(LogPotentialInit)) THEN
   DEALLOCATE(LogPotentialInit)
   ALLOCATE(LogPotentialInit(nsurf,mchem))

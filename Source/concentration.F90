@@ -175,6 +175,10 @@ MODULE  concentration
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: C1
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: C2
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: eps_r
+  REAL(DP), DIMENSION(:,:,:,:,:), ALLOCATABLE      :: psi
+  REAL(DP), DIMENSION(:,:,:,:), ALLOCATABLE        :: sigma0
+  REAL(DP), DIMENSION(:,:,:,:), ALLOCATABLE        :: sigmab
+  REAL(DP), DIMENSION(:,:,:,:), ALLOCATABLE        :: sigmad
   REAL(DP), DIMENSION(:), ALLOCATABLE              :: satkin
   REAL(DP), DIMENSION(:,:), ALLOCATABLE            :: spexb
   REAL(DP), DIMENSION(:,:), ALLOCATABLE            :: spsurfb
