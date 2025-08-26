@@ -21,6 +21,13 @@ def test_parse_planes_line_attached_value():
     assert result["planes"] == (0.5, 0.3, 0.2)
 
 
+def test_parse_planes_line_default_planes():
+    """Lines without a ``planes=`` specification yield ``None``."""
+    line = ">FeOH 5.0"
+    result = parse_planes_line(line)
+    assert result["planes"] is None
+
+
 def test_parse_edl_block():
     lines = [
         "irrelevant line",
