@@ -1,3 +1,4 @@
+import pytest
 from psi_crunch import parse_edl_block, parse_planes_line
 
 
@@ -40,4 +41,23 @@ def test_parse_edl_block():
     assert params[">FeOH"] == (1.0, 0.2, 78.5)
     assert params[">FeOH2"] == (1.5, 0.3, 80.0)
     assert len(params) == 2
+
+
+def test_parse_edl_block_missing_end():
+    lines = [
+        "Begin edl parameters",
+        "  >FeOH   1.0  0.2  78.5",
+    ]
+    with pytest.raises(ValueError):
+        parse_edl_block(lines)
+
+
+def test_parse_edl_block_malformed_line():
+    lines = [
+        "Begin edl parameters",
+        "  >FeOH   1.0  bad  78.5",
+        "End edl parameters",
+    ]
+    with pytest.raises(ValueError):
+        parse_edl_block(lines)
 
