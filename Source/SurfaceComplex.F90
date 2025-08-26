@@ -83,6 +83,13 @@ REAL(DP)                                                    :: LogTotalEquivalen
 REAL(DP)                                                    :: check
 
 REAL(DP)                                                        :: lnActivity
+REAL(DP)                                                    :: psi0
+REAL(DP)                                                    :: psib
+REAL(DP)                                                    :: psid
+REAL(DP)                                                    :: phi
+REAL(DP)                                                    :: faraday
+REAL(DP)                                                    :: rgas
+REAL(DP)                                                    :: tk
 CHARACTER (LEN=3)                                               :: ulabPrint
 
 DO jz = 1,nz
@@ -96,10 +103,10 @@ DO jz = 1,nz
 
         IF (nptlink(ns) /= 0) THEN                            !  Electrostatic correction
 
-          delta_z = zsurf(ns+nsurf) - zsurf(islink(ns))       
+          delta_z = zsurf(ns+nsurf) - zsurf(islink(ns))
           sum = 0.0
           DO i = 1,ncomp
-              
+
             ulabPrint = ulab(i)
             IF (ulabPrint(1:3) == 'H2O' .or. ulabPrint(1:3) == 'HHO') THEN
               lnActivity = lngamma(i,jx,jy,jz)
@@ -109,8 +116,8 @@ DO jz = 1,nz
             sum = sum + musurf(ns,i)*lnActivity
             continue
           END DO
-          
-          LogTotalSites = LogTotalSurface(islink(ns),jx,jy,jz) 
+
+          LogTotalSites = LogTotalSurface(islink(ns),jx,jy,jz)
 
 !!  Surface complexes
           DO is = 1,nsurf
@@ -118,11 +125,24 @@ DO jz = 1,nz
             sum = sum + musurf(ns,is+ncomp)*Activity
           END DO
 
-          spsurf(ns+nsurf,jx,jy,jz) = keqsurf(ns,jx,jy,jz) + sum                                &    
-            - 2.0d0*musurf(ns,islink(ns)+ncomp) * delta_z * LogPotential(nptlink(ns),jx,jy,jz)  &
-            - (musurf(ns,islink(ns)+ncomp)-1.0d0) * LogTotalSites                               &
-            - DLOG(musurf(ns,islink(ns)+ncomp)) 
-          
+          IF (ABS(z0_s(ns+nsurf)) + ABS(zb_s(ns+nsurf)) + ABS(zd_s(ns+nsurf)) > 0.0d0) THEN
+            psi0 = psi(1,nptlink(ns),jx,jy,jz)
+            psib = psi(2,nptlink(ns),jx,jy,jz)
+            psid = psi(3,nptlink(ns),jx,jy,jz)
+            phi = z0_s(ns+nsurf)*psi0 + zb_s(ns+nsurf)*psib + zd_s(ns+nsurf)*psid
+            faraday = 96485.0d0
+            rgas = 8.3144621d0
+            tk = t(jx,jy,jz) + 273.15d0
+            spsurf(ns+nsurf,jx,jy,jz) = keqsurf(ns,jx,jy,jz) - faraday/(rgas*tk)*phi + sum       &
+              - (musurf(ns,islink(ns)+ncomp)-1.0d0) * LogTotalSites                              &
+              - DLOG(musurf(ns,islink(ns)+ncomp))
+          ELSE
+            spsurf(ns+nsurf,jx,jy,jz) = keqsurf(ns,jx,jy,jz) + sum                               &
+              - 2.0d0*musurf(ns,islink(ns)+ncomp) * delta_z * LogPotential(nptlink(ns),jx,jy,jz) &
+              - (musurf(ns,islink(ns)+ncomp)-1.0d0) * LogTotalSites                              &
+              - DLOG(musurf(ns,islink(ns)+ncomp))
+          END IF
+
           spsurf10(ns+nsurf,jx,jy,jz) = DEXP( spsurf(ns+nsurf,jx,jy,jz) )
           
 !!!  Surface Complexation Cheat Sheet    
