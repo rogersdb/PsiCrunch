@@ -7,6 +7,7 @@ functionality for unit testing.
 """
 from __future__ import annotations
 
+import re
 from typing import Dict, Iterable, Optional, Tuple
 
 
@@ -28,6 +29,7 @@ def parse_planes_line(line: str) -> Dict[str, Optional[Tuple[float, float, float
         provided.  When the ``planes=`` specification is absent, the
         ``planes`` entry is ``None``.
     """
+    line = re.split(r"[#!]", line, 1)[0]
     tokens = line.strip().split()
     if len(tokens) < 2:
         raise ValueError("line missing site or z value")
@@ -80,7 +82,7 @@ def parse_edl_block(lines: Iterable[str]) -> Dict[str, Tuple[float, float, float
     in_block = False
     params: Dict[str, Tuple[float, float, float]] = {}
     for raw in lines:
-        line = raw.strip()
+        line = re.split(r"[#!]", raw, 1)[0].strip()
         if not line:
             continue
         lower = line.lower()
