@@ -63,6 +63,17 @@ def test_parse_edl_block_with_comments():
     assert len(params) == 2
 
 
+def test_parse_edl_block_case_insensitive_markers():
+    lines = [
+        "BEGIN EDL PARAMETERS",
+        "  >FeOH   1.0  0.2  78.5",
+        "EnD EdL PaRaMeTeRs",
+    ]
+    params = parse_edl_block(lines)
+    assert params[">FeOH"] == (1.0, 0.2, 78.5)
+    assert len(params) == 1
+
+
 def test_parse_edl_block_missing_end():
     lines = [
         "Begin edl parameters",
