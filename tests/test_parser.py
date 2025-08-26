@@ -35,6 +35,30 @@ def test_parse_planes_line_with_comment():
     assert result["planes"] == (0.5, 0.3, 0.2)
 
 
+def test_parse_planes_line_missing_plane_values():
+    line = ">FeOH 5.0 planes="
+    with pytest.raises(ValueError):
+        parse_planes_line(line)
+
+
+def test_parse_planes_line_malformed_plane_spec():
+    line = ">FeOH 5.0 planes= 0.5 0.3 not-a-number"
+    with pytest.raises(ValueError):
+        parse_planes_line(line)
+
+
+def test_parse_planes_line_mixed_case_keyword():
+    line = ">FeOH 5.0 PlAnEs= 0.5 0.3 0.2"
+    result = parse_planes_line(line)
+    assert result["planes"] == (0.5, 0.3, 0.2)
+
+
+def test_parse_planes_line_exclamation_comment():
+    line = ">FeOH 5.0 planes= 0.5 0.3 0.2 ! comment"
+    result = parse_planes_line(line)
+    assert result["planes"] == (0.5, 0.3, 0.2)
+
+
 def test_parse_edl_block():
     lines = [
         "irrelevant line",
@@ -108,4 +132,26 @@ def test_parse_edl_block_unmatched():
     assert ">FeOH" in params
     assert ">Unknown" not in params
     assert unmatched == [">Unknown"]
+
+
+def test_parse_edl_block_missing_begin():
+    lines = [
+        "  >FeOH   1.0  0.2  78.5",
+        "End edl parameters",
+    ]
+    params, unmatched = parse_edl_block(lines)
+    assert params == {}
+    assert unmatched == []
+
+
+def test_parse_edl_block_bang_comment_line():
+    lines = [
+        "Begin edl parameters",
+        "  ! an exclamation comment",
+        "  >FeOH   1.0  0.2  78.5 ! trailing",
+        "End edl parameters",
+    ]
+    params, unmatched = parse_edl_block(lines)
+    assert params[">FeOH"] == (1.0, 0.2, 78.5)
+    assert unmatched == []
 
