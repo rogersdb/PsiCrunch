@@ -8,7 +8,8 @@ functionality for unit testing.
 from __future__ import annotations
 
 import re
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Iterable, Optional, Tuple, Sequence, List
+import warnings
 
 
 def parse_planes_line(line: str) -> Dict[str, Optional[Tuple[float, float, float]]]:
@@ -59,19 +60,27 @@ def parse_planes_line(line: str) -> Dict[str, Optional[Tuple[float, float, float
     return {'site': site, 'z': z, 'planes': planes}
 
 
-def parse_edl_block(lines: Iterable[str]) -> Dict[str, Tuple[float, float, float]]:
+def parse_edl_block(
+    lines: Iterable[str],
+    known_sites: Optional[Sequence[str]] = None,
+) -> Tuple[Dict[str, Tuple[float, float, float]], List[str]]:
     """Parse an ``edl parameters`` block.
 
     Parameters
     ----------
     lines:
-        Iterable over lines of an input file.  Only the portion between
+        Iterable over lines of an input file. Only the portion between
         ``Begin edl parameters`` and ``End edl parameters`` is read.
+    known_sites:
+        Optional sequence of surface site names. Entries in the block that do
+        not match any of these names are ignored and returned in the list of
+        unmatched sites. A warning is emitted for each unmatched entry.
 
     Returns
     -------
-    dict
-        Mapping from surface site names to ``(C1, C2, eps_r)`` tuples.
+    tuple
+        Two items: a mapping from surface site names to ``(C1, C2, eps_r)``
+        tuples and a list of unmatched site names.
 
     Raises
     ------
@@ -81,6 +90,7 @@ def parse_edl_block(lines: Iterable[str]) -> Dict[str, Tuple[float, float, float
     """
     in_block = False
     params: Dict[str, Tuple[float, float, float]] = {}
+    unmatched: List[str] = []
     for raw in lines:
         line = re.split(r"[#!]", raw, 1)[0].strip()
         if not line:
@@ -101,7 +111,16 @@ def parse_edl_block(lines: Iterable[str]) -> Dict[str, Tuple[float, float, float
                 values = tuple(float(p) for p in parts[1:4])
             except ValueError as exc:
                 raise ValueError(f"malformed line in edl parameters: {line!r}") from exc
-            params[site] = values
+            if known_sites is not None and site not in known_sites:
+                unmatched.append(site)
+            else:
+                params[site] = values
     if in_block:
         raise ValueError("edl parameters block missing 'End edl parameters'")
-    return params
+    for site in unmatched:
+        warnings.warn(
+            f"edl parameters entry for unknown site '{site}'",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+    return params, unmatched

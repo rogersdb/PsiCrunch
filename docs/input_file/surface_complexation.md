@@ -17,3 +17,17 @@ followed by the keyword *--no_edl*, for example:
 
 The capability for surface complexation on the bulk material will be
 added soon.
+
+### EDL Parameters
+
+Electrostatic double-layer properties for surface sites are specified in an
+``edl parameters`` block::
+
+    Begin edl parameters
+      >FeOH   1.0  0.2  78.5
+    End edl parameters
+
+Each line defines the site name followed by ``C1``, ``C2`` and the dielectric
+constant ``eps_r``. Entries whose site names do not match any defined surface
+complex are ignored and a warning is issued so that unmatched sites can be
+identified and corrected.
