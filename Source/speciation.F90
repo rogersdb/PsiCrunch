@@ -471,7 +471,7 @@ DO jz = 1,nz
           ELSE
             npt = nptlink(ns-nsurf)
           END IF
-          IF (npt != 0) THEN
+          IF (npt /= 0) THEN
             psi0_local = psi(1,npt,jx,jy,jz)
             psib_local = psi(2,npt,jx,jy,jz)
             psid_local = psi(3,npt,jx,jy,jz)
