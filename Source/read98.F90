@@ -164,12 +164,14 @@ CHARACTER (LEN=mls)                                                :: parfind
 REAL(DP)                                                           :: realjunk
 REAL(DP)                                                           :: sum_planes
 INTEGER(I4B)                                                       :: lchar
+INTEGER(I4B)                                                       :: eqpos
 
 CHARACTER (LEN=50)                                                 :: label
 CHARACTER (LEN=mls)                                                :: string1
 CHARACTER (LEN=mls)                                                :: namtemp
 CHARACTER (LEN=mls)                                                :: namtemp2
 CHARACTER (LEN=mls)                                                :: section
+CHARACTER (LEN=mls)                                                :: planes_str
 
 LOGICAL(LGT)                                                       :: found
 LOGICAL(LGT)                                                       :: O2gasFound
@@ -817,23 +819,31 @@ IF (nsurf > 0) THEN
         zsurf(is) = DNUM(ssch)
         id = ids + ls
         CALL sschaine(zone,id,iff,ssch,ids,ls)
-        IF (ls /= 0 .AND. ssch == 'planes') THEN
-          id = ids + ls
-          CALL sschaine(zone,id,iff,ssch,ids,ls)
-          IF (ssch == '=') THEN
+        IF (ls /= 0) THEN
+          IF (ssch == 'planes' .OR. INDEX(ssch,'planes=') == 1) THEN
+            IF (ssch == 'planes') THEN
+              id = ids + ls
+              CALL sschaine(zone,id,iff,ssch,ids,ls)
+              IF (ssch == '=') THEN
+                id = ids + ls
+                CALL sschaine(zone,id,iff,ssch,ids,ls)
+              END IF
+              z0_s(is) = DNUM(ssch)
+            ELSE
+              eqpos = INDEX(ssch,'=')
+              planes_str = ssch(eqpos+1:ls)
+              z0_s(is) = DNUM(planes_str)
+            END IF
             id = ids + ls
             CALL sschaine(zone,id,iff,ssch,ids,ls)
-          END IF
-          z0_s(is) = DNUM(ssch)
-          id = ids + ls
-          CALL sschaine(zone,id,iff,ssch,ids,ls)
-          zb_s(is) = DNUM(ssch)
-          id = ids + ls
-          CALL sschaine(zone,id,iff,ssch,ids,ls)
-          zd_s(is) = DNUM(ssch)
-          sum_planes = z0_s(is) + zb_s(is) + zd_s(is)
-          IF (ABS(sum_planes-1.0d0) > 1.0d-6) THEN
-            WRITE(*,*) ' Warning: planes coefficients for ', namtemp(1:ls), ' do not sum to unity'
+            zb_s(is) = DNUM(ssch)
+            id = ids + ls
+            CALL sschaine(zone,id,iff,ssch,ids,ls)
+            zd_s(is) = DNUM(ssch)
+            sum_planes = z0_s(is) + zb_s(is) + zd_s(is)
+            IF (ABS(sum_planes-1.0d0) > 1.0d-6) THEN
+              WRITE(*,*) ' Warning: planes coefficients for ', namtemp(1:ls), ' do not sum to unity'
+            END IF
           END IF
         END IF
         GO TO 1010
@@ -880,23 +890,31 @@ IF (nsurf > 0) THEN
         zsurf(ns+nsurf) = DNUM(ssch)
         id = ids + ls
         CALL sschaine(zone,id,iff,ssch,ids,ls)
-        IF (ls /= 0 .AND. ssch == 'planes') THEN
-          id = ids + ls
-          CALL sschaine(zone,id,iff,ssch,ids,ls)
-          IF (ssch == '=') THEN
+        IF (ls /= 0) THEN
+          IF (ssch == 'planes' .OR. INDEX(ssch,'planes=') == 1) THEN
+            IF (ssch == 'planes') THEN
+              id = ids + ls
+              CALL sschaine(zone,id,iff,ssch,ids,ls)
+              IF (ssch == '=') THEN
+                id = ids + ls
+                CALL sschaine(zone,id,iff,ssch,ids,ls)
+              END IF
+              z0_s(ns+nsurf) = DNUM(ssch)
+            ELSE
+              eqpos = INDEX(ssch,'=')
+              planes_str = ssch(eqpos+1:ls)
+              z0_s(ns+nsurf) = DNUM(planes_str)
+            END IF
             id = ids + ls
             CALL sschaine(zone,id,iff,ssch,ids,ls)
-          END IF
-          z0_s(ns+nsurf) = DNUM(ssch)
-          id = ids + ls
-          CALL sschaine(zone,id,iff,ssch,ids,ls)
-          zb_s(ns+nsurf) = DNUM(ssch)
-          id = ids + ls
-          CALL sschaine(zone,id,iff,ssch,ids,ls)
-          zd_s(ns+nsurf) = DNUM(ssch)
-          sum_planes = z0_s(ns+nsurf) + zb_s(ns+nsurf) + zd_s(ns+nsurf)
-          IF (ABS(sum_planes-1.0d0) > 1.0d-6) THEN
-            WRITE(*,*) ' Warning: planes coefficients for ', namtemp(1:ls), ' do not sum to unity'
+            zb_s(ns+nsurf) = DNUM(ssch)
+            id = ids + ls
+            CALL sschaine(zone,id,iff,ssch,ids,ls)
+            zd_s(ns+nsurf) = DNUM(ssch)
+            sum_planes = z0_s(ns+nsurf) + zb_s(ns+nsurf) + zd_s(ns+nsurf)
+            IF (ABS(sum_planes-1.0d0) > 1.0d-6) THEN
+              WRITE(*,*) ' Warning: planes coefficients for ', namtemp(1:ls), ' do not sum to unity'
+            END IF
           END IF
         END IF
         GO TO 2010
