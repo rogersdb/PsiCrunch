@@ -18,32 +18,55 @@ followed by the keyword *--no_edl*, for example:
 The capability for surface complexation on the bulk material will be
 added soon.
 
-### Plane fractions
+### Input file
 
-For triple layer models, each surface site can specify the fractions of
-charge residing on the 0, 1 and 2 planes using the ``planes=`` keyword.
-The three coefficients should sum to unity. When ``planes=`` is omitted,
-the plane fractions default to undefined values.
+The **SURFACE_COMPLEXATION** block lists the surface sites included in a
+problem and the mineral on which each site resides:
 
-    SURFACE_COMPLEXATION
-      >FeOH   5.0  planes= 0.5 0.3 0.2
-      >FeOH2  2.0  planes= 0.3 0.4 0.3
-    End
+```
+SURFACE_COMPLEXATION
+  >FeOH_strong on Fe(OH)3
+  >FeOH_weak   on Fe(OH)3
+End
+```
 
-### EDL Parameters
+Adding ``--no_edl`` after the mineral name disables the electrical double
+layer for that particular site.
 
-Electrostatic double-layer properties for surface sites are specified in an
-``edl parameters`` block::
+### Database entries for triple layer models
 
-    Begin edl parameters
-      >FeOH   1.0  0.2  78.5
-      >FeOH2  1.5  0.3  80.0
-    End edl parameters
+Triple layer models require additional information in the database file.
+Each surface complex and its associated charge are listed in a
+``surface complexation parameters`` block.  Optional plane fractions may
+be supplied using the ``planes=`` keyword to distribute the charge among
+the 0, 1 and 2 planes.  The three coefficients should sum to unity; when
+``planes=`` is omitted, all coefficients default to zero.
 
-Each line defines the site name followed by ``C1``, ``C2`` and the dielectric
-constant ``eps_r``. Entries whose site names do not match any defined surface
-complex are ignored and a warning is issued so that unmatched sites can be
-identified and corrected.
+```
+Begin surface complexation parameters
+>FeOH    0.0  planes= 0.5 0.3 0.2
+>FeOH2   1.0  planes= 0.3 0.4 0.3
+>FeO-   -1.0  planes= 0.5 0.3 0.2
+>FeOH2+  1.0  planes= 0.3 0.4 0.3
+End surface complexation parameters
+```
 
-A complete example of the ``planes=`` syntax and ``edl parameters`` block
-is provided in [examples/tlm_demo.in](../../examples/tlm_demo.in).
+Electrostatic double-layer properties are specified in an ``edl
+parameters`` block that lists the site name followed by ``C1``, ``C2`` and
+the relative dielectric constant ``eps_r``:
+
+```
+Begin edl parameters
+  >FeOH   1.0  0.2  78.5
+  >FeOH2  1.5  0.3  80.0
+End edl parameters
+```
+
+Entries whose site names do not match any defined surface complex are
+ignored and a warning is issued so that unmatched sites can be identified
+and corrected.
+
+A concise demonstration of the input and database syntax is provided in
+the example files
+[examples/tlm_demo.in](../../examples/tlm_demo.in) and
+[examples/tlm_demo.dbs](../../examples/tlm_demo.dbs).

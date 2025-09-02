@@ -1,0 +1,19 @@
+# Database snippet demonstrating triple layer model parameters
+# for the surface sites defined in ``tlm_demo.in``.
+
+Begin surface complexation
+'>FeO-'    2 -1.0 'H+' 1.0 '>FeOH'    0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+'>FeOH2+'  2  1.0 'H+' 1.0 '>FeOH'    0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+End of surface complexation
+
+Begin surface complexation parameters
+>FeOH    0.0  planes= 0.5 0.3 0.2
+>FeOH2   1.0  planes= 0.3 0.4 0.3
+>FeO-   -1.0  planes= 0.5 0.3 0.2
+>FeOH2+  1.0  planes= 0.3 0.4 0.3
+End surface complexation parameters
+
+Begin edl parameters
+  >FeOH   1.0  0.2  78.5
+  >FeOH2  1.5  0.3  80.0
+End edl parameters
