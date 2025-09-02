@@ -88,7 +88,7 @@ REAL(DP)                                                    :: psib
 REAL(DP)                                                    :: psid
 REAL(DP)                                                    :: phi
 REAL(DP)                                                    :: faraday
-REAL(DP)                                                    :: rgas
+REAL(DP)                                                    :: rgas_local
 REAL(DP)                                                    :: tk
 CHARACTER (LEN=3)                                               :: ulabPrint
 
@@ -131,9 +131,9 @@ DO jz = 1,nz
             psid = psi(3,nptlink(ns),jx,jy,jz)
             phi = z0_s(ns+nsurf)*psi0 + zb_s(ns+nsurf)*psib + zd_s(ns+nsurf)*psid
             faraday = 96485.0d0
-            rgas = 8.3144621d0
+            rgas_local = 8.3144621d0
             tk = t(jx,jy,jz) + 273.15d0
-            spsurf(ns+nsurf,jx,jy,jz) = keqsurf(ns,jx,jy,jz) - faraday/(rgas*tk)*phi + sum       &
+            spsurf(ns+nsurf,jx,jy,jz) = keqsurf(ns,jx,jy,jz) - faraday/(rgas_local*tk)*phi + sum       &
               - (musurf(ns,islink(ns)+ncomp)-1.0d0) * LogTotalSites                              &
               - DLOG(musurf(ns,islink(ns)+ncomp))
           ELSE
