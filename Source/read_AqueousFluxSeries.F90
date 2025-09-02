@@ -1,17 +1,17 @@
 !!! *** Copyright Notice ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
-!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).† All rights reserved.
-!!!†
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
+!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).¬† All rights reserved.
+!!!¬†
 !!! If you have questions about your rights to use or distribute this software, please contact 
-!!! Berkeley Lab's Innovation & Partnerships Office at††IPO@lbl.gov.
-!!!†
-!!! NOTICE.† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
+!!! Berkeley Lab's Innovation & Partnerships Office at¬†¬†IPO@lbl.gov.
+!!!¬†
+!!! NOTICE.¬† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
 !!! consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting 
 !!! on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, 
 !!! prepare derivative works, and perform publicly and display publicly, and to permit other to do so.
 !!!
 !!! *** License Agreement ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
 !!! subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved."
 !!! 
 !!! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -54,7 +54,7 @@ USE runtime
 IMPLICIT NONE
 
 INTERFACE
-  SUBROUTINE read_multstring(nout,lchar,parchar,parfind, stringarray,lenarray,section)
+  SUBROUTINE read_multstring(nout,lchar,parchar,parfind, strarray,lenarray,section)
   USE crunchtype
   USE params
   USE strings
@@ -63,7 +63,7 @@ INTERFACE
   INTEGER(I4B), INTENT(OUT)                                   :: lchar
   CHARACTER (LEN=mls), INTENT(IN)                             :: parchar
   CHARACTER (LEN=mls), INTENT(IN OUT)                         :: parfind
-  CHARACTER (LEN=mls), DIMENSION(:), INTENT(IN OUT)           :: stringarray
+  CHARACTER (LEN=mls), DIMENSION(:), INTENT(IN OUT)           :: strarray
   INTEGER(I4B), INTENT(OUT)                                   :: lenarray
   CHARACTER (LEN=mls), INTENT(IN)                             :: section
   END SUBROUTINE read_multstring

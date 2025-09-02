@@ -157,7 +157,7 @@ END INTERFACE
 
 
 INTERFACE
-SUBROUTINE read_multstring(nout,lchar,parchar,parfind, stringarray,lenarray,section)
+SUBROUTINE read_multstring(nout,lchar,parchar,parfind, strarray,lenarray,section)
 USE crunchtype
 USE params
 USE strings
@@ -166,7 +166,7 @@ INTEGER(I4B), INTENT(IN)                                    :: nout
 INTEGER(I4B), INTENT(OUT)                                   :: lchar
 CHARACTER (LEN=mls), INTENT(IN)                             :: parchar
 CHARACTER (LEN=mls), INTENT(IN OUT)                         :: parfind
-CHARACTER (LEN=mls), DIMENSION(:), INTENT(IN OUT)           :: stringarray
+CHARACTER (LEN=mls), DIMENSION(:), INTENT(IN OUT)           :: strarray
 INTEGER(I4B), INTENT(OUT)                                   :: lenarray
 CHARACTER (LEN=mls), INTENT(IN)                             :: section
 END SUBROUTINE read_multstring
