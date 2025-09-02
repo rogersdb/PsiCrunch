@@ -124,7 +124,8 @@ REAL(DP)                                              :: sion_tmp
 REAL(DP)                                              :: P_appelo
 REAL(DP)                                              :: P_bars
 REAL(DP)                                              :: Av
-REAL(DP)                                              :: eps_r
+! Local variable renamed to avoid conflict with module variable
+REAL(DP)                                              :: eps_rel
 REAL(DP)                                              :: RgasAppelo
 REAL(DP)                                              :: ConvertBarsToAtm
 REAL(DP)                                              :: ConvertPaToBars
@@ -244,7 +245,7 @@ IF (SaltCreep) THEN
   D1000_bradleyPitz = U1 * DEXP(U2*temp + U3*temp*temp)
   B_BradleyPitz = U7 + U8/temp + U9*temp
   
-  eps_r = D1000_bradleyPitz + C_BradleyPitz * Log( (B_BradleyPitz + P_bars)/(B_BradleyPitz+1000.0) )  
+  eps_rel = D1000_bradleyPitz + C_BradleyPitz * Log( (B_BradleyPitz + P_bars)/(B_BradleyPitz+1000.0) )
 
   partialLogEps = C_BradleyPitz/       &
       (  (B_BradleyPitz + P_bars) * ( C_BradleyPitz * Log( (B_BradleyPitz + P_bars)/(B_BradleyPitz+1000.0) ) +   &
@@ -403,7 +404,7 @@ IF (CalciteCreep) THEN
   D1000_bradleyPitz = U1 *EXP(U2*temp + U3*temp*temp)
   B_BradleyPitz = U7 + U8/temp + U9*temp
     
-  eps_r = D1000_bradleyPitz + C_BradleyPitz * Log( (B_BradleyPitz + P_bars)/(B_BradleyPitz+1000.0) )  
+  eps_rel = D1000_bradleyPitz + C_BradleyPitz * Log( (B_BradleyPitz + P_bars)/(B_BradleyPitz+1000.0) )
 
   partialLogEps = C_BradleyPitz/       &
       (  (B_BradleyPitz + P_bars) * ( C_BradleyPitz * Log( (B_BradleyPitz + P_bars)/(B_BradleyPitz+1000.0) ) +   &
