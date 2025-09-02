@@ -1,17 +1,17 @@
 !!! *** Copyright Notice ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
-!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).† All rights reserved.
-!!!†
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory 
+!!! (subject to receipt of any required approvals from the U.S. Dept. of Energy).¬† All rights reserved.
+!!!¬†
 !!! If you have questions about your rights to use or distribute this software, please contact 
-!!! Berkeley Lab's Innovation & Partnerships Office at††IPO@lbl.gov.
-!!!†
-!!! NOTICE.† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
+!!! Berkeley Lab's Innovation & Partnerships Office at¬†¬†IPO@lbl.gov.
+!!!¬†
+!!! NOTICE.¬† This Software was developed under funding from the U.S. Department of Energy and the U.S. Government 
 !!! consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting 
 !!! on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, 
 !!! prepare derivative works, and perform publicly and display publicly, and to permit other to do so.
 !!!
 !!! *** License Agreement ***
-!!! ìCrunchFlowî, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
+!!! ‚ÄúCrunchFlow‚Äù, Copyright (c) 2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory)
 !!! subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved."
 !!! 
 !!! Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -79,17 +79,17 @@ REAL(DP)                                             :: perturb=1.0E-09
 REAL(DP)                                                    :: tempc
 REAL(DP), ALLOCATABLE, DIMENSION(:)                         :: spppTMP
 REAL(DP), ALLOCATABLE, DIMENSION(:)                         :: spppTMP10
-REAL(DP), ALLOCATABLE, DIMENSION(:)                         :: keqaqTMP
+REAL(DP), ALLOCATABLE, DIMENSION(:)                         :: keqaqTMP_local
 REAL(DP), ALLOCATABLE, DIMENSION(:)                         :: gammaTMP
 REAL(DP), ALLOCATABLE, DIMENSION(:)                         :: sTotTMP
-REAL(DP), ALLOCATABLE, DIMENSION(:,:)                       :: NumericalJac 
+REAL(DP), ALLOCATABLE, DIMENSION(:,:)                       :: NumericalJac_local 
 ;
 ALLOCATE(spppTMP(ncomp+nspec))
 ALLOCATE(spppTMP10(ncomp+nspec))
-ALLOCATE(keqaqTMP(nspec))
+ALLOCATE(keqaqTMP_local(nspec))
 ALLOCATE(gammaTMP(ncomp+nspec))
 ALLOCATE(sTotTMP(ncomp))
-ALLOCATE(NumericalJac(ncomp,ncomp))
+ALLOCATE(NumericalJac_local(ncomp,ncomp))
 
 fjac = 0.0d0
 
@@ -135,25 +135,25 @@ DO jz = 1,nz
               gammaTMP(ik)  = gam(ik,jx,jy,jz)
       end do
       do ksp = 1,nspec
-        keqaqTMP(ksp)  = keqaq(ksp,jx,jy,jz)
+        keqaqTMP_local(ksp)  = keqaq(ksp,jx,jy,jz)
       end do
 
       
       
-      NumericalJac = 0.0d0
+      NumericalJac_local = 0.0d0
       do ik = 1,ncomp
 
          spppTMP(ik) = spppTMP(ik) + perturb
          spppTMP10(ik) = DEXP(spppTMP(ik))
         
-!!!        call GammaResidual(ncomp,nspec,tempc,spppTMP,keqaqTMP,gammaTMP,sTotTMP)
+!!!        call GammaResidual(ncomp,nspec,tempc,spppTMP,keqaqTMP_local,gammaTMP,sTotTMP)
         
         DO ksp = 1,nspec   
           sum = 0.0D0
           DO i = 1,ncomp
             sum = sum + muaq(ksp,i)*(spppTMP(i) + gammaTMP(i))
           END DO
-          spppTMP(ksp+ncomp) = keqaqTMP(ksp) - gammaTMP(ksp+ncomp) + sum
+          spppTMP(ksp+ncomp) = keqaqTMP_local(ksp) - gammaTMP(ksp+ncomp) + sum
           spppTMP10(ksp+ncomp) = DEXP(spppTMP(ksp+ncomp))           
         END DO
       
@@ -168,14 +168,14 @@ DO jz = 1,nz
         END DO
        
         do i = 1,ncomp
-          NumericalJac(ik,i) = ( sTotTMP(i) - s(i,jx,jy,jz) )/perturb
+          NumericalJac_local(ik,i) = ( sTotTMP(i) - s(i,jx,jy,jz) )/perturb
         end do
         
          spppTMP(ik) = spppTMP(ik) - perturb
          spppTMP10(ik) = DEXP(spppTMP(ik))
          
          do i = 1,ncomp
-           fjac(ik,i,jx,jy,jz) = NumericalJac(ik,i)
+           fjac(ik,i,jx,jy,jz) = NumericalJac_local(ik,i)
           end do
         
       END DO
